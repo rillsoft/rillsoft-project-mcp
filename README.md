@@ -102,8 +102,11 @@ messages follow the language of the running Rillsoft Project. How
 `tools/list`, schemas, errors, undo, read-only mode and sessions work:
 [Developers: the MCP server contract](https://rillsoft.ai/en/developers/).
 
-The complete tool catalogue will be generated from `tools/list` of the
-released build and published here and on the developers page.
+The complete tool catalogue – 118 tools of Rillsoft Project 10.0.624.0 with
+title, access class, parameters and description – is in
+[TOOLS.md](TOOLS.md). It is generated from `tools/list` of the running program
+by `scripts/generate_tools.py`, never edited by hand; the raw result, including
+the output schemas, is in [tools-list.json](tools-list.json).
 
 ## Links
 

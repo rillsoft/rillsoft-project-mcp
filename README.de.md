@@ -103,8 +103,12 @@ Meldungen folgen der Sprache des laufenden Rillsoft Project. Wie
 `tools/list`, Schemas, Fehler, Rückgängig, Nur-Lesen-Modus und Sitzungen
 funktionieren: [Entwickler: der Vertrag des MCP-Servers](https://rillsoft.ai/de/entwickler/).
 
-Der vollständige Werkzeugkatalog wird aus `tools/list` des ausgelieferten
-Builds erzeugt und hier sowie auf der Entwicklerseite veröffentlicht.
+Der vollständige Werkzeugkatalog – 118 Werkzeuge von Rillsoft Project
+10.0.624.0 mit Titel, Zugriffsart, Parametern und Beschreibung – steht in
+[TOOLS.md](TOOLS.md) (englisch, wie das Programm ihn liefert). Er wird von
+`scripts/generate_tools.py` aus `tools/list` des laufenden Programms erzeugt
+und nie von Hand gepflegt; das Rohergebnis samt Ausgabeschemas steht in
+[tools-list.json](tools-list.json).
 
 ## Links
 
