@@ -113,6 +113,7 @@ Builds erzeugt und hier sowie auf der Entwicklerseite veröffentlicht.
 - Entwickler: https://rillsoft.ai/de/entwickler/
 - Prompt-Bibliothek: https://rillsoft.ai/de/prompts/
 - Produkt: https://www.rillsoft.de/mcp-server/
+- Offizielle MCP-Registry: `ai.rillsoft/rillsoft-project` ([Eintrag](https://registry.modelcontextprotocol.io/v0/servers?search=ai.rillsoft/rillsoft-project))
 
 ## Anbieter
 

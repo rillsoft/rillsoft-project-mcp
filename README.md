@@ -112,6 +112,7 @@ released build and published here and on the developers page.
 - Developers: https://rillsoft.ai/en/developers/
 - Prompt library: https://rillsoft.ai/en/prompts/
 - Product: https://www.rillsoft.com/mcp-server/
+- Official MCP Registry: `ai.rillsoft/rillsoft-project` ([entry](https://registry.modelcontextprotocol.io/v0/servers?search=ai.rillsoft/rillsoft-project))
 
 ## Provider
 
