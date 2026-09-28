@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "rillsoft-project": {
+      "type": "http",
+      "url": "http://127.0.0.1:3928/mcp",
+      "headers": { "Authorization": "Bearer <KEY>" }
+    }
+  }
+}

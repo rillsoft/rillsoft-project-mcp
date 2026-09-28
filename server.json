@@ -1,0 +1,12 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "ai.rillsoft/rillsoft-project",
+  "title": "Rillsoft Project",
+  "description": "MCP server built into Rillsoft Project 10 for multi-project resource planning (local, Windows)",
+  "websiteUrl": "https://rillsoft.ai/en/mcp/",
+  "repository": {
+    "url": "https://github.com/rillsoft/rillsoft-project-mcp",
+    "source": "github"
+  },
+  "version": "10.0.0"
+}
