@@ -1,0 +1,2200 @@
+{
+  "version": "10.0.624.0",
+  "capturedAt": "2026-09-28",
+  "protocolVersion": "2025-06-18",
+  "count": {
+    "total": 118,
+    "readOnly": 37,
+    "write": 81,
+    "destructive": 38
+  },
+  "sections": [
+    {
+      "id": "projects",
+      "title": "Projects and files",
+      "tools": [
+        {
+          "name": "rillsoft_project_conflict_list",
+          "title": "List conflicts",
+          "access": "read-only",
+          "params": [
+            {
+              "name": "category",
+              "required": false
+            }
+          ],
+          "description": "Reads the six conflict lists of the info sheet as a flat YAML report: delayed (tasks lagging behind the status date), overload (overallocated resources), resourceLoss (failed resources), unassigned (unassigned resources), partiallyAssigned (partially assigned resources) and crossProjectDependencies (cross-project dependencies together with their float). The same selection as the tabs of that sheet; one task can appear in several lists. Numbers in hours, dates as everywhere else. Read-only, no undo step."
+        },
+        {
+          "name": "rillsoft_project_create",
+          "title": "Create project",
+          "access": "write, destructive",
+          "params": [
+            {
+              "name": "discardChanges",
+              "required": false
+            },
+            {
+              "name": "name",
+              "required": false
+            }
+          ],
+          "description": "Creates a new empty project and replaces the one that is open. With unsaved changes pending, discardChanges:true is required. Opening an existing file goes through rillsoft_project_file_open. The command history starts over, so this call cannot be undone."
+        },
+        {
+          "name": "rillsoft_project_file_export_xml",
+          "title": "Export project as RIS XML",
+          "access": "write, destructive",
+          "params": [
+            {
+              "name": "path",
+              "required": true
+            },
+            {
+              "name": "overwrite",
+              "required": false
+            }
+          ],
+          "description": "Writes the open project into an .xml file in exactly the form the Rillsoft Integration Server receives on upload (rillprj version 13, UTF-8, stylesheet instruction). This is not the older 'save as XML' of the File menu, which follows its own settings. Where that file exists already, overwrite:true is required. The project itself is not touched - neither its path nor its saved state changes - and a portfolio is refused. No undo step."
+        },
+        {
+          "name": "rillsoft_project_file_open",
+          "title": "Open project file",
+          "access": "write, destructive",
+          "params": [
+            {
+              "name": "path",
+              "required": true
+            },
+            {
+              "name": "discardChanges",
+              "required": false
+            }
+          ],
+          "description": "Opens exactly one project file (.rpj) and replaces the current project. A portfolio (.rpp) is refused; rillsoft_portfolio_file_open covers that. With unsaved changes pending, discardChanges:true is required. No undo step - the command history starts over. Whatever the loader has to say ends up in note."
+        },
+        {
+          "name": "rillsoft_project_file_save",
+          "title": "Save project file",
+          "access": "write, destructive",
+          "params": [],
+          "description": "Saves the open project under the path it already has. Where it has never been saved, rillsoft_project_file_save_as is required. An open portfolio is refused; there rillsoft_portfolio_project_files_save writes the contained project files back. No undo step."
+        },
+        {
+          "name": "rillsoft_project_file_save_as",
+          "title": "Save project file as",
+          "access": "write, destructive",
+          "params": [
+            {
+              "name": "path",
+              "required": true
+            },
+            {
+              "name": "overwrite",
+              "required": false
+            }
+          ],
+          "description": "Saves the project under a new path (.rpj). Where that file exists already, overwrite:true is required. Refused while a portfolio is open; there rillsoft_portfolio_project_files_save saves the contained projects. No undo step."
+        },
+        {
+          "name": "rillsoft_project_renumber",
+          "title": "Renumber project",
+          "access": "write",
+          "params": [],
+          "description": "Renumbers the project - the same function as the 'Renumber' menu: pull WBS codes into a gapless sequence, align task numbers with the WBS order, normalize the structure. Worth doing after rillsoft_project_sort or after many rillsoft_element_move calls. Refused in a portfolio. One undo step."
+        },
+        {
+          "name": "rillsoft_project_reschedule",
+          "title": "Reschedule project",
+          "access": "write",
+          "params": [
+            {
+              "name": "direction",
+              "required": false
+            }
+          ],
+          "description": "Reschedules the project: the same menu entries as 'Recalculate as early as possible' and 'as late as possible'. Fixed tasks and tasks already begun stay where they are - they are the anchors the rest is aligned to, and nothing moves before the status date. The direction is not stored state but this one-off recalculation; rillsoft_project_tree_get shows the new dates afterwards. One undo step."
+        },
+        {
+          "name": "rillsoft_project_ris_delete",
+          "title": "Delete RIS project",
+          "access": "write, destructive",
+          "params": [
+            {
+              "name": "projectId",
+              "required": true
+            }
+          ],
+          "description": "Deletes a project of the logged-in client on the Rillsoft Integration Server - the 'Delete project' button of the folder dialog. The server deactivates it with all its versions (soft delete; an administrator can restore it there). The project that is open right now, alone or inside the open portfolio, is refused (ris_project_is_open; call rillsoft_project_create first). rillsoft_project_ris_save_as is the counterpart that creates projects; a local file is not touched. Takes effect at once: no undo step. Runs with the login of the desktop session."
+        },
+        {
+          "name": "rillsoft_project_ris_list",
+          "title": "List RIS projects",
+          "access": "read-only",
+          "params": [
+            {
+              "name": "permission",
+              "required": false
+            }
+          ],
+          "description": "Lists the folders and projects of the logged-in client on the Rillsoft Integration Server (RIS) with projectId, versionId, uuid, name, code, path, lock and template flags - the projectId is what rillsoft_project_ris_open takes. Runs with the login of the desktop session and never asks for credentials; the answer names server, userName and clientId. Local project files are opened through rillsoft_project_file_open instead. Read-only, no undo step."
+        },
+        {
+          "name": "rillsoft_project_ris_open",
+          "title": "Open RIS project",
+          "access": "write, destructive",
+          "params": [
+            {
+              "name": "projectId",
+              "required": true
+            },
+            {
+              "name": "discardChanges",
+              "required": false
+            },
+            {
+              "name": "lock",
+              "required": false
+            },
+            {
+              "name": "readOnly",
+              "required": false
+            }
+          ],
+          "description": "Opens a project of the logged-in client from the Rillsoft Integration Server by its projectId (see rillsoft_project_ris_list) and replaces the current project. Templates are refused (ris_template_unsupported); a local .rpj file is opened through rillsoft_project_file_open instead. With unsaved changes pending, discardChanges:true is required. Runs with the login of the desktop session and never asks for credentials. Saving goes back to the server through rillsoft_project_ris_save. No undo step - the command history starts over. Whatever the loader has to say ends up in note."
+        },
+        {
+          "name": "rillsoft_project_ris_save",
+          "title": "Save RIS project",
+          "access": "write, destructive",
+          "params": [
+            {
+              "name": "notes",
+              "required": false
+            }
+          ],
+          "description": "Writes the open project back to the Rillsoft Integration Server as a new version of the project it was opened from (rillsoft_project_ris_open). Creates one new version on the server per call; the document is then reloaded from the server; the UUIDs of every element stay valid, and the command history is kept, so the last steps can still be undone afterwards. Refused where the open document is not a project of the server (ris_project_not_open; use rillsoft_project_ris_save_as to store it there as a new project), where it is open read-only (ris_read_only), or where the server holds a newer version or a foreign lock (ris_conflict - reopen it). A local file is saved through rillsoft_project_file_save. Runs with the login of the desktop session and never asks for credentials. No undo step."
+        },
+        {
+          "name": "rillsoft_project_ris_save_as",
+          "title": "Save RIS project as",
+          "access": "write, destructive",
+          "params": [
+            {
+              "name": "folderId",
+              "required": true
+            },
+            {
+              "name": "notes",
+              "required": false
+            },
+            {
+              "name": "template",
+              "required": false
+            }
+          ],
+          "description": "Stores the open single project - new, a local file or a project of the server - as a new project in a folder of the logged-in client on the Rillsoft Integration Server. Creates one new project with version 1 per call, even when called twice. The document becomes that server project afterwards: rillsoft_project_ris_save writes further versions, a former file path no longer applies; the command history is kept. The new project is held in the optimistic lock mode; reopen it with rillsoft_project_ris_open lock:pessimistic to lock it. A portfolio is refused; a local copy is written through rillsoft_project_file_save_as. Runs with the login of the desktop session and never asks for credentials. No undo step."
+        },
+        {
+          "name": "rillsoft_project_sort",
+          "title": "Reorder elements",
+          "access": "write",
+          "params": [
+            {
+              "name": "criterion",
+              "required": true
+            }
+          ],
+          "description": "Reorders the elements of the project - the same ordering function as the 'Order by ...' menu. What gets reassigned are the WBS codes; task numbers stay untouched (use rillsoft_project_renumber for those). It acts on the main project and on every subproject. Refused in a portfolio. One undo step."
+        },
+        {
+          "name": "rillsoft_project_status_date_reschedule",
+          "title": "Reschedule at status date",
+          "access": "write",
+          "params": [],
+          "description": "Runs the status date computation: whatever is unfinished moves behind the current status date, computed by RP. One undo step."
+        },
+        {
+          "name": "rillsoft_project_status_date_set",
+          "title": "Set status date",
+          "access": "write",
+          "params": [
+            {
+              "name": "statusDate",
+              "required": true
+            }
+          ],
+          "description": "Sets the status date of the project without recomputing anything. Moving unfinished work behind the new status date is a second, deliberate step through rillsoft_project_status_date_reschedule; recomputing the whole schedule goes through rillsoft_project_reschedule. Values before the project start are lifted to the project start. One undo step."
+        },
+        {
+          "name": "rillsoft_project_team_preference_remove",
+          "title": "Remove preferred team",
+          "access": "write, destructive",
+          "params": [
+            {
+              "name": "teamId",
+              "required": true
+            },
+            {
+              "name": "projectUuid",
+              "required": false
+            }
+          ],
+          "description": "Takes the preferred team of a project or subproject back out. The counterpart of rillsoft_project_team_preference_set. An inherited preferred team is removed at the pack that carries it; under preferredTeams[] rillsoft_project_tree_get shows only the entries a pack carries itself. Where the project or subproject does not carry that team, the call fails rather than reporting a silent success. Refused in a portfolio. One undo step."
+        },
+        {
+          "name": "rillsoft_project_team_preference_set",
+          "title": "Set preferred team",
+          "access": "write",
+          "params": [
+            {
+              "name": "teamId",
+              "required": true
+            },
+            {
+              "name": "projectUuid",
+              "required": false
+            }
+          ],
+          "description": "Marks a team as the preferred team of a project or subproject. This is not an assignment but a preference, carrying neither utilization nor productivity: it is inherited by every subproject below, it presets the team filter in rillsoft_task_resource_candidate_list and in the dialogs, and it narrows the supply in the capacity view split by project. projectUuid addresses the main project (empty) or any subproject. Read it back through rillsoft_project_tree_get (preferredTeams[]). Team assignments on individual tasks do not exist in this contract; people are assigned through rillsoft_task_employee_assignment_set. Refused in a portfolio. One undo step."
+        },
+        {
+          "name": "rillsoft_project_tree_get",
+          "title": "Read project",
+          "access": "read-only",
+          "params": [
+            {
+              "name": "includePositionRange",
+              "required": false
+            }
+          ],
+          "description": "Use this to read tasks and dependencies: it returns the whole project as a tree - key data including the status date, subprojects, tasks (UUID, WBS, computed dates, milestone and critical flags, progress and effort) and every dependency. There is no separate task list tool; this is the read path for them. Read-only, no undo step. Each task carries four assignment arrays: assignments[] (roles), employeeAssignments[], machineRoleAssignments[] and machineAssignments[] - empty where the task holds nothing of that resource type. Where several tasks use one machine or machine role together, it appears in none of those arrays but in sharedAssignments[] (type, id, name, quantity, utilization, sharedTaskUuids[] holding the UUIDs of the other tasks involved); that field is absent where the task shares nothing. A task with sameRow:true is drawn on one display row together with its WBS predecessor. With includePositionRange:true the position range per task is reported as well. Beware: the critical field is not a float indicator."
+        },
+        {
+          "name": "rillsoft_project_update",
+          "title": "Set project properties",
+          "access": "write",
+          "params": [
+            {
+              "name": "calendarId",
+              "required": false
+            },
+            {
+              "name": "categoryId",
+              "required": false
+            },
+            {
+              "name": "color",
+              "required": false
+            },
+            {
+              "name": "customerId",
+              "required": false
+            },
+            {
+              "name": "durationStepUnit",
+              "required": false
+            },
+            {
+              "name": "dynamicRedistribution",
+              "required": false
+            },
+            {
+              "name": "effortEditable",
+              "required": false
+            },
+            {
+              "name": "finish",
+              "required": false
+            },
+            {
+              "name": "fixed",
+              "required": false
+            },
+            {
+              "name": "name",
+              "required": false
+            },
+            {
+              "name": "outputQuantityEditable",
+              "required": false
+            },
+            {
+              "name": "planningVariant",
+              "required": false
+            },
+            {
+              "name": "primaryColor",
+              "required": false
+            },
+            {
+              "name": "priority",
+              "required": false
+            },
+            {
+              "name": "quantityStepUnit",
+              "required": false
+            },
+            {
+              "name": "schedulingMode",
+              "required": false
+            },
+            {
+              "name": "start",
+              "required": false
+            },
+            {
+              "name": "statusId",
+              "required": false
+            },
+            {
+              "name": "timeStepMinutes",
+              "required": false
+            },
+            {
+              "name": "validationMode",
+              "required": false
+            }
+          ],
+          "description": "Sets properties of the main project: key data (name, start, finish, fixing), calendar and color, the master-data references category, status, customer, priority and plan variant, plus scheduling mode, input step widths and the two metric switches. This changes the period of the project, not the time scale of the display (use rillsoft_timescale_apply for that). Subprojects go through rillsoft_subproject_update. One undo step."
+        }
+      ]
+    },
+    {
+      "id": "structure",
+      "title": "Structure: subprojects, elements and outline",
+      "tools": [
+        {
+          "name": "rillsoft_element_delete",
+          "title": "Delete element",
+          "access": "write, destructive",
+          "params": [
+            {
+              "name": "uuid",
+              "required": true
+            }
+          ],
+          "description": "Deletes a task or a subproject, together with its dependencies respectively its content. Here element means a task or a subproject - this is the generic way that takes either. Where you know which of the two you have, rillsoft_task_delete and rillsoft_subproject_delete say so in the name and refuse the other kind. The main project cannot be deleted. One undo step."
+        },
+        {
+          "name": "rillsoft_element_move",
+          "title": "Move element",
+          "access": "write",
+          "params": [
+            {
+              "name": "direction",
+              "required": false
+            },
+            {
+              "name": "extractFromSubproject",
+              "required": false
+            },
+            {
+              "name": "newParentUuid",
+              "required": false
+            },
+            {
+              "name": "number",
+              "required": false
+            },
+            {
+              "name": "position",
+              "required": false
+            },
+            {
+              "name": "uuid",
+              "required": false
+            },
+            {
+              "name": "uuids",
+              "required": false
+            }
+          ],
+          "description": "Moves elements - here an element is a task or a subproject. Give exactly one of position with newParentUuid, direction, or extractFromSubproject. RP reassigns the WBS codes; dependencies and assignments survive. Display rows stay valid: where only part of a row moves away, the row is split cleanly. One undo step."
+        },
+        {
+          "name": "rillsoft_element_reorder",
+          "title": "Reorder children",
+          "access": "write",
+          "params": [
+            {
+              "name": "orderedUuids",
+              "required": true
+            },
+            {
+              "name": "dissolveRows",
+              "required": false
+            },
+            {
+              "name": "parentUuid",
+              "required": false
+            }
+          ],
+          "description": "Reorders every direct child of a subproject completely and deterministically; a child is an element, meaning a task or a subproject. RP reassigns the WBS codes. An order that separates a display row is refused and names the UUIDs affected. One undo step."
+        },
+        {
+          "name": "rillsoft_element_subproject_group",
+          "title": "Group elements into subproject",
+          "access": "write",
+          "params": [
+            {
+              "name": "name",
+              "required": false
+            },
+            {
+              "name": "uuid",
+              "required": false
+            },
+            {
+              "name": "uuids",
+              "required": false
+            }
+          ],
+          "description": "Creates a subproject and pulls the named elements into it - an element being a task or a subproject. This groups elements that already exist; creating an empty subproject goes through rillsoft_subproject_create. One undo step, which takes the new subproject away again as well. The answer names the new subproject (uuid, wbs) and the elements that were moved."
+        },
+        {
+          "name": "rillsoft_fixed_element_list",
+          "title": "List fixed elements",
+          "access": "read-only",
+          "params": [],
+          "description": "Lists every fixed element of the project - an element here being a task, a milestone or a subproject - whose dates are pinned. These are exactly the elements rillsoft_project_reschedule leaves in place - to reschedule a project freely, release them first through rillsoft_task_update or rillsoft_subproject_update with fixed:false. projectFixed reports the same for the main project. Read-only, no undo step."
+        },
+        {
+          "name": "rillsoft_outline_apply",
+          "title": "Apply outline state",
+          "access": "read-only",
+          "params": [
+            {
+              "name": "openRows",
+              "required": false
+            },
+            {
+              "name": "outline",
+              "required": false
+            }
+          ],
+          "description": "Expands or collapses the visible resource or capacity view - the same effect as the expand and collapse buttons of the ribbon. Give exactly one of outline and openRows; openRows restores a state read before, row by row, which outline alone cannot do once someone has opened rows by hand. In any other view the call fails and points at rillsoft_view_state_apply. No undo step and no change to the plan itself - no task, no assignment, no date moves; that is why this tool counts as read-only. What it does change is the way the project is displayed: the outline state is stored with the project, and going through the user interface marks the document as changed, so a later save writes the new state along. It answers like rillsoft_outline_get."
+        },
+        {
+          "name": "rillsoft_outline_get",
+          "title": "Read outline state",
+          "access": "read-only",
+          "params": [],
+          "description": "Reads how far the visible resource or capacity view is expanded: outline names the absolute state where the view is in one (collapsed, level_1 to level_3, expanded) and mixed where it is not, openRows[] names every group row that is open in the same coordinates the report uses per row, levels[] gives the grouping of the view outermost first, and canExpand and canCollapse say whether anything is left to do. In any other view the call fails and points at rillsoft_view_state_apply. Read-only, no undo step."
+        },
+        {
+          "name": "rillsoft_outline_row_apply",
+          "title": "Apply outline state of one row",
+          "access": "read-only",
+          "params": [
+            {
+              "name": "action",
+              "required": true
+            },
+            {
+              "name": "row",
+              "required": true
+            }
+          ],
+          "description": "Opens or closes one single group row of the visible resource or capacity view - the same effect as clicking the plus or minus in front of it. Every other row keeps its state, which is what sets this apart from rillsoft_outline_apply. Rows that become visible this way can be opened the same way, level by level. A row already in the wanted state is left alone and reported back, so the call can be repeated. A row whose parent is still closed is not addressable; open the parent first. In any other view the call fails and points at rillsoft_view_state_apply. Like a click it moves the selection to that row and the property sheet of the info window follows. No undo step and no change to the plan itself - no task, no assignment, no date moves; that is why this tool counts as read-only. What it does change is the way the project is displayed: the outline state is stored with the project, and going through the user interface marks the document as changed, so a later save writes the new state along. It answers like rillsoft_outline_get."
+        },
+        {
+          "name": "rillsoft_subproject_create",
+          "title": "Create subproject",
+          "access": "write",
+          "params": [
+            {
+              "name": "name",
+              "required": true
+            },
+            {
+              "name": "finish",
+              "required": false
+            },
+            {
+              "name": "parentUuid",
+              "required": false
+            },
+            {
+              "name": "start",
+              "required": false
+            }
+          ],
+          "description": "Creates a subproject (a summary task) and returns its UUID. It creates an empty one - grouping elements that already exist into a new subproject goes through rillsoft_element_subproject_group. Changing it afterwards goes through rillsoft_subproject_update, deleting it through rillsoft_subproject_delete. One undo step."
+        },
+        {
+          "name": "rillsoft_subproject_delete",
+          "title": "Delete subproject",
+          "access": "write, destructive",
+          "params": [
+            {
+              "name": "uuid",
+              "required": true
+            }
+          ],
+          "description": "Deletes a subproject together with everything inside it. Refused where the UUID names a task - rillsoft_task_delete does that one, and rillsoft_element_delete takes either kind. The main project cannot be deleted; use rillsoft_project_create for a fresh one. Creating goes through rillsoft_subproject_create, changing through rillsoft_subproject_update. One undo step."
+        },
+        {
+          "name": "rillsoft_subproject_update",
+          "title": "Update subproject",
+          "access": "write",
+          "params": [
+            {
+              "name": "uuid",
+              "required": true
+            },
+            {
+              "name": "calendarId",
+              "required": false
+            },
+            {
+              "name": "code",
+              "required": false
+            },
+            {
+              "name": "color",
+              "required": false
+            },
+            {
+              "name": "finish",
+              "required": false
+            },
+            {
+              "name": "fixed",
+              "required": false
+            },
+            {
+              "name": "name",
+              "required": false
+            },
+            {
+              "name": "notes",
+              "required": false
+            },
+            {
+              "name": "primaryColor",
+              "required": false
+            },
+            {
+              "name": "start",
+              "required": false
+            }
+          ],
+          "description": "Changes a subproject: name, start, finish, notes, pinning, calendar, color and code. The main project goes through rillsoft_project_update, a task through rillsoft_task_update, and deleting the subproject through rillsoft_subproject_delete. One undo step."
+        }
+      ]
+    },
+    {
+      "id": "tasks",
+      "title": "Tasks, assignments and progress",
+      "tools": [
+        {
+          "name": "rillsoft_task_create",
+          "title": "Create task",
+          "access": "write",
+          "params": [
+            {
+              "name": "name",
+              "required": true
+            },
+            {
+              "name": "durationHours",
+              "required": false
+            },
+            {
+              "name": "finish",
+              "required": false
+            },
+            {
+              "name": "fixedType",
+              "required": false
+            },
+            {
+              "name": "milestone",
+              "required": false
+            },
+            {
+              "name": "notes",
+              "required": false
+            },
+            {
+              "name": "parentUuid",
+              "required": false
+            },
+            {
+              "name": "start",
+              "required": false
+            }
+          ],
+          "description": "Creates a task (RP computes the dates through the calendar) and returns its UUID. Changing it afterwards goes through rillsoft_task_update, moving it in the structure through rillsoft_element_move, deleting it through rillsoft_task_delete. One undo step."
+        },
+        {
+          "name": "rillsoft_task_delete",
+          "title": "Delete task",
+          "access": "write, destructive",
+          "params": [
+            {
+              "name": "uuid",
+              "required": true
+            }
+          ],
+          "description": "Deletes a task together with its dependencies. Refused where the UUID names a subproject - rillsoft_subproject_delete does that one, and rillsoft_element_delete takes either kind. Creating goes through rillsoft_task_create, changing through rillsoft_task_update. One undo step."
+        },
+        {
+          "name": "rillsoft_task_dependency_create",
+          "title": "Create dependency",
+          "access": "write",
+          "params": [
+            {
+              "name": "predecessorUuid",
+              "required": true
+            },
+            {
+              "name": "successorUuid",
+              "required": true
+            },
+            {
+              "name": "dependencyDistanceHours",
+              "required": false
+            },
+            {
+              "name": "dependencyDistanceType",
+              "required": false
+            },
+            {
+              "name": "type",
+              "required": false
+            }
+          ],
+          "description": "Creates a dependency between two tasks. It links existing tasks; it does not create them, and it does not move them - RP computes the new dates from the link. Removing it again goes through rillsoft_task_dependency_delete. One undo step."
+        },
+        {
+          "name": "rillsoft_task_dependency_delete",
+          "title": "Delete dependency",
+          "access": "write, destructive",
+          "params": [
+            {
+              "name": "predecessorUuid",
+              "required": true
+            },
+            {
+              "name": "successorUuid",
+              "required": true
+            },
+            {
+              "name": "type",
+              "required": false
+            }
+          ],
+          "description": "Deletes the dependency between two tasks. Only the link goes; both tasks stay, and deleting a task itself goes through rillsoft_task_delete. One undo step."
+        },
+        {
+          "name": "rillsoft_task_employee_assignment_set",
+          "title": "Assign person",
+          "access": "write",
+          "params": [
+            {
+              "name": "employeeId",
+              "required": true
+            },
+            {
+              "name": "quantity",
+              "required": true
+            },
+            {
+              "name": "taskUuid",
+              "required": true
+            },
+            {
+              "name": "utilization",
+              "required": false
+            }
+          ],
+          "description": "Assigns one specific existing person to a task, or removes that assignment with quantity 0. It touches one task - one person across many tasks goes through rillsoft_resource_usage_set, and filling many tasks at once through rillsoft_task_resource_assignment_fill. The master data stays untouched; an overload over time is a legitimate planning state and shows up in the report. One undo step."
+        },
+        {
+          "name": "rillsoft_task_machine_assignment_set",
+          "title": "Assign machine",
+          "access": "write",
+          "params": [
+            {
+              "name": "machineId",
+              "required": true
+            },
+            {
+              "name": "quantity",
+              "required": true
+            },
+            {
+              "name": "taskUuid",
+              "required": true
+            },
+            {
+              "name": "utilization",
+              "required": false
+            }
+          ],
+          "description": "Assigns one specific existing machine to a task, or removes that assignment with quantity 0. The twin of rillsoft_task_employee_assignment_set; machines carry neither an employment period nor an efficiency. It touches one task - letting several tasks share one machine goes through rillsoft_machine_sharing_create. The master data stays untouched; an overload over time is a legitimate planning state and shows up in the report. One undo step."
+        },
+        {
+          "name": "rillsoft_task_machine_role_assignment_derive",
+          "title": "Derive machine kinds from assignments",
+          "access": "write, destructive",
+          "params": [
+            {
+              "name": "taskUuids",
+              "required": false
+            }
+          ],
+          "description": "The 'Derive machine kinds from the assignment' wizard: rebuilds the machine role assignments of each task out of the concrete machines assigned to it - existing machine role assignments are replaced, quantity and volume are formed from those machines. Reports them under machineRoleAssignments[]. People are the mirror case and go through rillsoft_task_role_assignment_derive; setting a single machine kind by hand goes through rillsoft_task_machine_role_assignment_set. One undo step. Tasks without concrete assignments appear with the cause in skipped[]."
+        },
+        {
+          "name": "rillsoft_task_machine_role_assignment_set",
+          "title": "Assign machine role",
+          "access": "write",
+          "params": [
+            {
+              "name": "machineRoleId",
+              "required": true
+            },
+            {
+              "name": "quantity",
+              "required": true
+            },
+            {
+              "name": "taskUuid",
+              "required": true
+            },
+            {
+              "name": "utilization",
+              "required": false
+            }
+          ],
+          "description": "Assigns a machine role from the existing master data to a task, or removes it again with quantity 0. The twin of rillsoft_task_role_assignment_set for the machine park; one undo step."
+        },
+        {
+          "name": "rillsoft_task_material_assignment_set",
+          "title": "Assign material",
+          "access": "write",
+          "params": [
+            {
+              "name": "materialId",
+              "required": true
+            },
+            {
+              "name": "quantity",
+              "required": true
+            },
+            {
+              "name": "taskUuid",
+              "required": true
+            },
+            {
+              "name": "calculationMode",
+              "required": false
+            },
+            {
+              "name": "notes",
+              "required": false
+            }
+          ],
+          "description": "Assigns material from the existing master data to a task, or removes that assignment with quantity 0. Material carries neither utilization nor capacity: it moves no dates but feeds the cost through quantity and calculation mode. Calling it again changes the existing assignment. One undo step."
+        },
+        {
+          "name": "rillsoft_task_progress_recalculate",
+          "title": "Recompute progress",
+          "access": "write",
+          "params": [],
+          "description": "Derives the actual progress of every task from the current status date, computed by RP. It writes progress, not dates - moving unfinished work goes through rillsoft_project_status_date_reschedule, and a single task by hand through rillsoft_task_progress_set. One undo step."
+        },
+        {
+          "name": "rillsoft_task_progress_set",
+          "title": "Set progress",
+          "access": "write",
+          "params": [
+            {
+              "name": "progressPercent",
+              "required": true
+            },
+            {
+              "name": "uuid",
+              "required": true
+            }
+          ],
+          "description": "Sets the actual progress of a task (0 to 100 %). It sets one task by hand; deriving the progress of every task from the status date goes through rillsoft_task_progress_recalculate, and the planning data of the task itself through rillsoft_task_update. The value is passed along to predecessors and successors. One undo step."
+        },
+        {
+          "name": "rillsoft_task_resource_assignment_fill",
+          "title": "Assign resources automatically",
+          "access": "write",
+          "params": [
+            {
+              "name": "assignments",
+              "required": false
+            },
+            {
+              "name": "mode",
+              "required": false
+            },
+            {
+              "name": "resourceIds",
+              "required": false
+            },
+            {
+              "name": "taskUuids",
+              "required": false
+            },
+            {
+              "name": "type",
+              "required": false
+            }
+          ],
+          "description": "The 'Assign staff' respectively 'Assign machine park' wizard: fills many tasks at once out of their role assignments. One call is exactly one undo step, labelled like the menu entry. An assignment is made only where the task carries the matching role, the resource is not on it yet, it is not already involved through another role, and the balance of that role is still open. The result gives the assignments made per task plus skipped[] with the cause. Only at progress 0 %."
+        },
+        {
+          "name": "rillsoft_task_resource_assignment_remove",
+          "title": "Take resources off tasks",
+          "access": "write, destructive",
+          "params": [
+            {
+              "name": "resourceIds",
+              "required": true
+            },
+            {
+              "name": "taskUuids",
+              "required": false
+            },
+            {
+              "name": "type",
+              "required": false
+            }
+          ],
+          "description": "The 'Remove staff' respectively 'Remove machine park' wizard: takes the named resources out of many tasks at once - one undo step. A task already begun is split at its progress first, and the completed part keeps its assignment. Completed tasks stay untouched and appear with the cause in skipped[]."
+        },
+        {
+          "name": "rillsoft_task_resource_candidate_list",
+          "title": "List candidates",
+          "access": "read-only",
+          "params": [
+            {
+              "name": "matchingOnly",
+              "required": false
+            },
+            {
+              "name": "roleIds",
+              "required": false
+            },
+            {
+              "name": "searchText",
+              "required": false
+            },
+            {
+              "name": "taskUuid",
+              "required": false
+            },
+            {
+              "name": "taskUuids",
+              "required": false
+            },
+            {
+              "name": "teamFilter",
+              "required": false
+            },
+            {
+              "name": "type",
+              "required": false
+            }
+          ],
+          "description": "Reports per task the roles attached to it (quantity, assigned, balance, balanceOpen) and the candidates matching them - the same set the task dialog shows after the role and team filter. Per candidate: id, name, code, teamId, free (free capacity within the task period), cost, alreadyAssigned, scheduleConflict and reason where it cannot be assigned; with type employee also availability and efficiency. Read-only, no undo step. Filling the slots afterwards goes through rillsoft_task_employee_assignment_set, rillsoft_task_machine_assignment_set or rillsoft_task_resource_assignment_fill."
+        },
+        {
+          "name": "rillsoft_task_role_assignment_derive",
+          "title": "Derive roles from assignments",
+          "access": "write, destructive",
+          "params": [
+            {
+              "name": "taskUuids",
+              "required": false
+            }
+          ],
+          "description": "The 'Derive roles from the assignment' wizard: rebuilds the role assignments of each task out of the concrete people assigned to it - existing role assignments are replaced, quantity and volume are formed from those people. Reports them under assignments[]. Machine kinds are the mirror case and go through rillsoft_task_machine_role_assignment_derive; setting a single role by hand goes through rillsoft_task_role_assignment_set. One undo step. Tasks without concrete assignments appear with the cause in skipped[]."
+        },
+        {
+          "name": "rillsoft_task_role_assignment_set",
+          "title": "Assign role",
+          "access": "write",
+          "params": [
+            {
+              "name": "quantity",
+              "required": true
+            },
+            {
+              "name": "roleId",
+              "required": true
+            },
+            {
+              "name": "taskUuid",
+              "required": true
+            },
+            {
+              "name": "utilization",
+              "required": false
+            }
+          ],
+          "description": "Assigns a role (a professional qualification) from the existing pool to a task, or removes it again with quantity 0. A role is the requirement, not the person: filling it with someone concrete goes through rillsoft_task_employee_assignment_set, and rillsoft_task_role_assignment_derive works the other way round and rebuilds roles out of the people already assigned. Machine kinds are the mirror case (rillsoft_task_machine_role_assignment_set). One undo step."
+        },
+        {
+          "name": "rillsoft_task_split",
+          "title": "Split task",
+          "access": "write",
+          "params": [
+            {
+              "name": "uuid",
+              "required": true
+            },
+            {
+              "name": "completedPart",
+              "required": false
+            },
+            {
+              "name": "linkParts",
+              "required": false
+            },
+            {
+              "name": "number",
+              "required": false
+            },
+            {
+              "name": "proportions",
+              "required": false
+            },
+            {
+              "name": "sameRow",
+              "required": false
+            },
+            {
+              "name": "splitTime",
+              "required": false
+            }
+          ],
+          "description": "Splits a task. Give exactly one of splitTime, completedPart or proportions. Splitting into n parts is a single undo step. The result is parts[] carrying uuid, wbs, number, name, start, finish, durationHours and progressPercent in WBS order. Beware: every part keeps the UUID of the original task, which is what preserves the baseline reference. What is unique is the number; passed as number it addresses one part in rillsoft_task_update, rillsoft_task_split and rillsoft_task_split_options_get. The name stays the same for all parts as well (just as in the user interface); rename them one by one through rillsoft_task_update."
+        },
+        {
+          "name": "rillsoft_task_split_options_get",
+          "title": "Read split options",
+          "access": "read-only",
+          "params": [
+            {
+              "name": "uuid",
+              "required": true
+            },
+            {
+              "name": "number",
+              "required": false
+            },
+            {
+              "name": "resourceType",
+              "required": false
+            }
+          ],
+          "description": "Enumerates the ways a task can be split: completedPart (the point of progress), shiftStarts[] (starting shifts from the quantity profile), conflicts[] (start times of colliding tasks together with resourceType), criteria[] (criterion, metric, totalValue for proportions), plus splittable and timeSheet. Read-only, no undo step. Every point of time it reports can be passed straight to rillsoft_task_split.splitTime without conversion."
+        },
+        {
+          "name": "rillsoft_task_update",
+          "title": "Update task",
+          "access": "write",
+          "params": [
+            {
+              "name": "uuid",
+              "required": true
+            },
+            {
+              "name": "calendarId",
+              "required": false
+            },
+            {
+              "name": "code",
+              "required": false
+            },
+            {
+              "name": "durationHours",
+              "required": false
+            },
+            {
+              "name": "dynamicRedistribution",
+              "required": false
+            },
+            {
+              "name": "finish",
+              "required": false
+            },
+            {
+              "name": "fixed",
+              "required": false
+            },
+            {
+              "name": "fixedType",
+              "required": false
+            },
+            {
+              "name": "name",
+              "required": false
+            },
+            {
+              "name": "notes",
+              "required": false
+            },
+            {
+              "name": "number",
+              "required": false
+            },
+            {
+              "name": "sameRow",
+              "required": false
+            },
+            {
+              "name": "start",
+              "required": false
+            }
+          ],
+          "description": "Changes the planning data of a task: name, dates, duration, notes, fixing, display row, task kind and the dynamic redistribution of the personnel effort. It changes the task itself - moving it in the structure goes through rillsoft_element_move, its progress through rillsoft_task_progress_set, its assignments through the rillsoft_task_*_assignment_set family, and a subproject through rillsoft_subproject_update. One undo step; conflicts are rolled back for you."
+        }
+      ]
+    },
+    {
+      "id": "resources",
+      "title": "Resources and resource pool",
+      "tools": [
+        {
+          "name": "rillsoft_machine_sharing_create",
+          "title": "Share machine",
+          "access": "write, destructive",
+          "params": [
+            {
+              "name": "resourceId",
+              "required": true
+            },
+            {
+              "name": "taskUuids",
+              "required": true
+            },
+            {
+              "name": "type",
+              "required": true
+            }
+          ],
+          "description": "Lets several tasks share one machine or machine role: the individual assignments go away and the resource is consumed once instead of n times - one crane used by three tasks is one crane. Beware, this loses information: quantity and utilization of the shared entry are the maximum over all participants, exactly as in the 'Share' menu. rillsoft_machine_sharing_release is therefore not an inverse - a task taken back out gets the shared value, not its original one. Afterwards the resource appears in rillsoft_project_tree_get under sharedAssignments[] and no longer under machineAssignments[] or machineRoleAssignments[]. One undo step."
+        },
+        {
+          "name": "rillsoft_machine_sharing_release",
+          "title": "Release shared use",
+          "access": "write, destructive",
+          "params": [
+            {
+              "name": "resourceId",
+              "required": true
+            },
+            {
+              "name": "taskUuid",
+              "required": true
+            },
+            {
+              "name": "type",
+              "required": true
+            }
+          ],
+          "description": "Takes one task back out of shared use: it gets its individual assignment back, carrying the shared value rather than its original one (see rillsoft_machine_sharing_create). Once the last task is gone, the shared entry disappears. The counterpart of the 'Exclusive' menu entry; one undo step."
+        },
+        {
+          "name": "rillsoft_resource_absence_list",
+          "title": "List absences",
+          "access": "read-only",
+          "params": [
+            {
+              "name": "absenceType",
+              "required": false
+            },
+            {
+              "name": "code",
+              "required": false
+            },
+            {
+              "name": "from",
+              "required": false
+            },
+            {
+              "name": "id",
+              "required": false
+            },
+            {
+              "name": "includeTeams",
+              "required": false
+            },
+            {
+              "name": "to",
+              "required": false
+            },
+            {
+              "name": "type",
+              "required": false
+            }
+          ],
+          "description": "Reads the absences of a person or a team: holiday, sickness and other time away. The pool is never changed."
+        },
+        {
+          "name": "rillsoft_resource_absence_sync",
+          "title": "Reconcile absences",
+          "access": "write, destructive",
+          "params": [
+            {
+              "name": "entries",
+              "required": true
+            },
+            {
+              "name": "timeWindow",
+              "required": false
+            }
+          ],
+          "description": "Mirrors the absences of many people and teams in one call - the daily run of a foreign system. Every entry is resolved and checked first and written only afterwards; one faulty entry leaves the whole run without effect. Inside an open unit of work only."
+        },
+        {
+          "name": "rillsoft_resource_pool_catalog_list",
+          "title": "List master data catalogs",
+          "access": "read-only",
+          "params": [
+            {
+              "name": "activeOnly",
+              "required": false
+            },
+            {
+              "name": "searchText",
+              "required": false
+            },
+            {
+              "name": "types",
+              "required": false
+            }
+          ],
+          "description": "Reads the catalogs of the existing master data: role, team, employee, material, machine_role, machine, project_category, project_status, project_customer and calendar - each entry with id and name, people additionally with teamIds, roleIds and personId. The ids fit rillsoft_task_employee_assignment_set, rillsoft_resource_pool_resource_get and the analysis report. The master data is never changed."
+        },
+        {
+          "name": "rillsoft_resource_pool_edit_close",
+          "title": "Close unit of work",
+          "access": "write, destructive",
+          "params": [
+            {
+              "name": "save",
+              "required": false
+            }
+          ],
+          "description": "Closes the unit of work and releases the lock. Without save:true the working copy is discarded, and the stored pool stays as it was."
+        },
+        {
+          "name": "rillsoft_resource_pool_edit_open",
+          "title": "Open unit of work",
+          "access": "write",
+          "params": [
+            {
+              "name": "discardChanges",
+              "required": false
+            }
+          ],
+          "description": "Opens a unit of work on the resource pool: it locks the pool and creates a working copy. Every writing pool tool is valid inside an open unit of work only, and none of them ever saves on its own. While a unit is open, rillsoft_resource_pool_file_select is blocked."
+        },
+        {
+          "name": "rillsoft_resource_pool_edit_save",
+          "title": "Save unit of work",
+          "access": "write, destructive",
+          "params": [
+            {
+              "name": "confirm",
+              "required": false
+            }
+          ],
+          "description": "Checks the working copy against the open projects and writes it back *once*. The unit of work stays open. Against the Rillsoft Integration Server this creates exactly one new pool version, no matter how many changes the unit holds."
+        },
+        {
+          "name": "rillsoft_resource_pool_file_select",
+          "title": "Select resource pool",
+          "access": "write",
+          "params": [
+            {
+              "name": "path",
+              "required": true
+            }
+          ],
+          "description": "Switches the global resource pool to a pool file (.xml). Possible only on a new, unmodified project, so call rillsoft_project_create first. No undo step; the setting holds application-wide."
+        },
+        {
+          "name": "rillsoft_resource_pool_get",
+          "title": "Read resource pool",
+          "access": "read-only",
+          "params": [],
+          "description": "Shows the current resource pool source (a file or the Rillsoft Integration Server), how much it holds (roles, teams, people, calendars) and whether a unit of work is open. The pool is never changed."
+        },
+        {
+          "name": "rillsoft_resource_pool_resource_create",
+          "title": "Create master data record",
+          "access": "write",
+          "params": [
+            {
+              "name": "type",
+              "required": true
+            },
+            {
+              "name": "fields",
+              "required": false
+            }
+          ],
+          "description": "Creates a single element in the resource pool. Inside an open unit of work only (rillsoft_resource_pool_edit_open); nothing is stored before rillsoft_resource_pool_edit_save. The group is picked through 'group' and created where it does not exist yet."
+        },
+        {
+          "name": "rillsoft_resource_pool_resource_delete",
+          "title": "Delete master data record",
+          "access": "write, destructive",
+          "params": [
+            {
+              "name": "type",
+              "required": true
+            },
+            {
+              "name": "code",
+              "required": false
+            },
+            {
+              "name": "id",
+              "required": false
+            }
+          ],
+          "description": "Deletes a single element of the resource pool. Where that leaves its group empty, the group goes with it. Inside an open unit of work only. Where something inside the pool still points at the element - a person on the role or team, a machine on the machine kind - the call is refused and names what refers to it, just as rillsoft_calendar_delete does. Assignments inside open projects are not checked: a project carries its own copy of the resource data, so deleting here does not reach into it."
+        },
+        {
+          "name": "rillsoft_resource_pool_resource_get",
+          "title": "Read master data record",
+          "access": "read-only",
+          "params": [
+            {
+              "name": "id",
+              "required": true
+            },
+            {
+              "name": "type",
+              "required": true
+            },
+            {
+              "name": "from",
+              "required": false
+            },
+            {
+              "name": "to",
+              "required": false
+            }
+          ],
+          "description": "Reads the complete master data of one object: a person with their identity, all their roles (efficiency, hourly rate), employment period, calendar, absences and shift cycles; a team with calendar, productivity and members; a customer with postal address and contact. Read-only, no undo step."
+        },
+        {
+          "name": "rillsoft_resource_pool_resource_update",
+          "title": "Update master data record",
+          "access": "write",
+          "params": [
+            {
+              "name": "type",
+              "required": true
+            },
+            {
+              "name": "code",
+              "required": false
+            },
+            {
+              "name": "fields",
+              "required": false
+            },
+            {
+              "name": "id",
+              "required": false
+            }
+          ],
+          "description": "Changes a single element of the resource pool as a partial update. Inside an open unit of work only. Absences cannot be changed here; the absence tools cover them."
+        },
+        {
+          "name": "rillsoft_resource_pool_ris_list",
+          "title": "List RIS clients",
+          "access": "read-only",
+          "params": [],
+          "description": "Lists the clients of the Rillsoft Integration Server whose resource pool the logged-in user may read - the clientId is what rillsoft_resource_pool_ris_select takes - and reports selectedClientId where the active pool already comes from the server. Runs with the login of the desktop session and never asks for credentials. A pool file is selected through rillsoft_resource_pool_file_select instead. Read-only, no undo step."
+        },
+        {
+          "name": "rillsoft_resource_pool_ris_select",
+          "title": "Select RIS resource pool",
+          "access": "write",
+          "params": [
+            {
+              "name": "clientId",
+              "required": true
+            }
+          ],
+          "description": "Switches the global resource pool to the pool of a client on the Rillsoft Integration Server and makes that client the logged-in client of the session (clientId of the other RIS tools). Possible only on a new, unmodified project and without an open unit of work, so call rillsoft_project_create first. A pool file is selected through rillsoft_resource_pool_file_select instead. Runs with the login of the desktop session and never asks for credentials. No undo step; the setting holds application-wide and survives a restart."
+        },
+        {
+          "name": "rillsoft_resource_usage_list",
+          "title": "List tasks using a resource",
+          "access": "read-only",
+          "params": [
+            {
+              "name": "resourceId",
+              "required": true
+            },
+            {
+              "name": "type",
+              "required": true
+            },
+            {
+              "name": "taskUuids",
+              "required": false
+            }
+          ],
+          "description": "Reports per task whether it carries one resource and with which values - the page 'Using tasks' of the capacity planning, read through the contract. Every task of the range appears, carrying or not; alreadyAssigned tells them apart. Per kind exactly its own columns: role and machine_role a count, team a productivity, employee an efficiency and who answers for the task, material an amount and a calculation mode, and everything but material a utilization. Team, employee and machine carry free on top - the capacity left within the task period - and team and employee availability from the calendar; employee adds employeeBalanceHours, absences, the compensator and whom the assignment stands in for. Hours are hours, never the volume unit of the view. Read-only, no undo step. Writing goes through rillsoft_resource_usage_set, which takes five of the six kinds - team assignments on tasks are not part of the write contract."
+        },
+        {
+          "name": "rillsoft_resource_usage_set",
+          "title": "Assign a resource to several tasks",
+          "access": "write",
+          "params": [
+            {
+              "name": "assignments",
+              "required": true
+            },
+            {
+              "name": "resourceId",
+              "required": true
+            },
+            {
+              "name": "type",
+              "required": true
+            }
+          ],
+          "description": "Puts one resource on several tasks at once, or takes it off them, with the single values per task - the page 'Using tasks' of the capacity planning, written through the contract. One call is exactly **one** undo step for all of them, labelled like the page. quantity 0 removes, as with the five single-task tools. Each entry carries only the fields the page offers for that kind (rillsoft_resource_usage_list documents them); a field that belongs to another kind, or one the page merely displays such as free, is refused by name. Every check runs before the change: a single unknown UUID leaves the project untouched and creates no undo step. team is not part of this contract - assigning a team to a task belongs to the Standard edition alone; read it through rillsoft_resource_usage_list and set the preferred team of a project through rillsoft_project_team_preference_set. Beware of the neighbour: rillsoft_task_resource_assignment_fill is the wizard, filling tasks automatically out of their roles and without single values; this one fills exactly the tasks named, with them."
+        }
+      ]
+    },
+    {
+      "id": "calendars",
+      "title": "Calendars",
+      "tools": [
+        {
+          "name": "rillsoft_calendar_create",
+          "title": "Create calendar",
+          "access": "write",
+          "params": [
+            {
+              "name": "code",
+              "required": false
+            },
+            {
+              "name": "color",
+              "required": false
+            },
+            {
+              "name": "name",
+              "required": false
+            },
+            {
+              "name": "notes",
+              "required": false
+            },
+            {
+              "name": "week",
+              "required": false
+            }
+          ],
+          "description": "Creates a calendar; without 'week' it takes the default weekly model, Monday to Friday 08:00-12:00;13:00-17:00. Inside an open unit of work only."
+        },
+        {
+          "name": "rillsoft_calendar_delete",
+          "title": "Delete calendar",
+          "access": "write, destructive",
+          "params": [
+            {
+              "name": "code",
+              "required": false
+            },
+            {
+              "name": "id",
+              "required": false
+            },
+            {
+              "name": "name",
+              "required": false
+            }
+          ],
+          "description": "Deletes a calendar. Where at least one idref_calendar points at it, the call is refused and names what refers to it - that reference lives inside the pool and would point nowhere. The last calendar of a pool stays. Inside an open unit of work only."
+        },
+        {
+          "name": "rillsoft_calendar_list",
+          "title": "List calendars",
+          "access": "read-only",
+          "params": [
+            {
+              "name": "from",
+              "required": false
+            },
+            {
+              "name": "id",
+              "required": false
+            },
+            {
+              "name": "to",
+              "required": false
+            }
+          ],
+          "description": "Reads calendars of the master data: the weekly scheme (shifts per weekday sun..sat, empty meaning a day off) and the exception days (public and special days) within the period. Read-only, no undo step."
+        },
+        {
+          "name": "rillsoft_calendar_source_get",
+          "title": "Read holiday source",
+          "access": "read-only",
+          "params": [
+            {
+              "name": "source",
+              "required": false
+            }
+          ],
+          "description": "Reads the holiday source without changing anything: which source calendars exist, and which years do they carry days for? The pool is never changed."
+        },
+        {
+          "name": "rillsoft_calendar_source_import",
+          "title": "Adopt holidays",
+          "access": "write, destructive",
+          "params": [
+            {
+              "name": "sourceCalendar",
+              "required": true
+            },
+            {
+              "name": "targetCalendar",
+              "required": true
+            },
+            {
+              "name": "source",
+              "required": false
+            },
+            {
+              "name": "years",
+              "required": false
+            }
+          ],
+          "description": "Adopts the holidays of a source calendar into a pool calendar. What gets replaced is a **whole year at a time**: a year the source carries days for is overwritten completely, company holidays entered by hand in that year included, while a year without source data stays untouched. The only guard against that is 'years'. The answer names the days removed and the days created per year. Inside an open unit of work only."
+        },
+        {
+          "name": "rillsoft_calendar_update",
+          "title": "Update calendar",
+          "access": "write, destructive",
+          "params": [
+            {
+              "name": "code",
+              "required": false
+            },
+            {
+              "name": "color",
+              "required": false
+            },
+            {
+              "name": "exceptionDays",
+              "required": false
+            },
+            {
+              "name": "id",
+              "required": false
+            },
+            {
+              "name": "name",
+              "required": false
+            },
+            {
+              "name": "newCode",
+              "required": false
+            },
+            {
+              "name": "newName",
+              "required": false
+            },
+            {
+              "name": "notes",
+              "required": false
+            },
+            {
+              "name": "range",
+              "required": false
+            },
+            {
+              "name": "week",
+              "required": false
+            }
+          ],
+          "description": "Changes a calendar as a partial update, so only the fields given take effect, and replaces its exception days inside a range you name explicitly. Days outside that range stay as they are. Inside an open unit of work only."
+        }
+      ]
+    },
+    {
+      "id": "baselines",
+      "title": "Baselines and variance",
+      "tools": [
+        {
+          "name": "rillsoft_baseline_create",
+          "title": "Create baseline",
+          "access": "write, destructive",
+          "params": [
+            {
+              "name": "name",
+              "required": false
+            },
+            {
+              "name": "replaceAll",
+              "required": false
+            }
+          ],
+          "description": "Creates a baseline as a snapshot of the current state of the project and selects it. With replaceAll:true the existing baselines are deleted first - that is the destructive part of this tool. Switching between existing baselines goes through rillsoft_baseline_select, and the planned-versus-actual comparison itself through rillsoft_variance_report_get. One undo step."
+        },
+        {
+          "name": "rillsoft_baseline_delete",
+          "title": "Delete baseline",
+          "access": "write, destructive",
+          "params": [
+            {
+              "name": "number",
+              "required": true
+            }
+          ],
+          "description": "Deletes a baseline; where it was the selected one, the selection falls back to the dynamic baseline. Only that snapshot goes - the project keeps its planning data untouched. Listing what exists goes through rillsoft_baseline_list. One undo step."
+        },
+        {
+          "name": "rillsoft_baseline_list",
+          "title": "List baselines",
+          "access": "read-only",
+          "params": [],
+          "description": "Reads the baselines of the project (number, name, uuid) and the active selection (number, dynamic, name). Number 0 while baselines exist means the dynamic baseline. Read-only, no undo step."
+        },
+        {
+          "name": "rillsoft_baseline_select",
+          "title": "Select baseline",
+          "access": "write",
+          "params": [
+            {
+              "name": "number",
+              "required": true
+            }
+          ],
+          "description": "Selects the baseline used for the planned-versus-actual comparison. It only moves the selection; no baseline is created or deleted here (rillsoft_baseline_create and rillsoft_baseline_delete do that), and the comparison itself is read through rillsoft_variance_report_get. One undo step."
+        },
+        {
+          "name": "rillsoft_variance_report_get",
+          "title": "Read variance report",
+          "access": "read-only",
+          "params": [],
+          "description": "Reads the visible variance view (time_variance, effort_variance or cost_variance) as a flat YAML report: per element the planned value from the active baseline, the actual value from the current computed state, and the variance between them. The scope is that one visible view, not the whole project - rillsoft_view_state_apply switches it, and rillsoft_baseline_select decides which baseline the comparison uses. It takes no parameters. Read-only, no undo step."
+        }
+      ]
+    },
+    {
+      "id": "analysis",
+      "title": "Analysis",
+      "tools": [
+        {
+          "name": "rillsoft_analysis_option_list",
+          "title": "List analysis options",
+          "access": "read-only",
+          "params": [
+            {
+              "name": "view",
+              "required": false
+            }
+          ],
+          "description": "Reports the supported views with the groupings (named ones and every 2D/3D/4D combination of the grouping menu), presentations and secondary views each of them permits, the value sets for secondaryChart and costCurve, and the view state currently set (view, grouping, presentation, time filter, secondary view). Ask this before rillsoft_view_state_apply to learn which combinations exist; pass view to get only the one view you need. Read-only, no undo step."
+        },
+        {
+          "name": "rillsoft_analysis_report_get",
+          "title": "Read analysis report",
+          "access": "read-only",
+          "params": [],
+          "description": "Reads the resource or capacity view currently visible as a flat YAML report: reference lists plus items carrying demand (and in capacity views supply) in the time grid of the visible calendar scale. The scope is that one visible view, not the whole project - which view it is comes from rillsoft_view_state_get, and rillsoft_view_state_apply switches it. It takes no parameters. Read-only, no undo step."
+        }
+      ]
+    },
+    {
+      "id": "portfolios",
+      "title": "Portfolios",
+      "tools": [
+        {
+          "name": "rillsoft_portfolio_file_open",
+          "title": "Open portfolio file",
+          "access": "write, destructive",
+          "params": [
+            {
+              "name": "path",
+              "required": true
+            },
+            {
+              "name": "discardChanges",
+              "required": false
+            }
+          ],
+          "description": "Opens exactly one file portfolio (.rpp), which is a list of project files, and replaces the current project. A single project file (.rpj) is refused; rillsoft_project_file_open covers that. The answer carries portfolio:true and projects[] (uuid, name, path, readOnly); lines of the .rpp that point nowhere end up in skipped[], anything else the loader has to say in note. Inside a portfolio the writing tools are refused - it is a view for evaluating several projects. No undo step."
+        },
+        {
+          "name": "rillsoft_portfolio_project_files_save",
+          "title": "Save portfolio project files",
+          "access": "write, destructive",
+          "params": [],
+          "description": "Writes the projects of an open file portfolio back into their own .rpj files; only the locked, writable members are saved, and the answer names them under saved[]. The .rpp itself is never written - it is only the list of paths, and there is no 'save as' for it. Where a single project is open, the call is refused (use rillsoft_project_file_save). No undo step."
+        },
+        {
+          "name": "rillsoft_portfolio_ris_create",
+          "title": "Create RIS portfolio",
+          "access": "write",
+          "params": [
+            {
+              "name": "name",
+              "required": true
+            },
+            {
+              "name": "combine",
+              "required": false
+            },
+            {
+              "name": "folderIds",
+              "required": false
+            },
+            {
+              "name": "projectIds",
+              "required": false
+            }
+          ],
+          "description": "Creates a portfolio of the logged-in client on the Rillsoft Integration Server - the 'New' button of the portfolio dialog - with its kind, folders and projects. Takes effect on the server at once: no undo step; rillsoft_portfolio_ris_delete removes it, rillsoft_portfolio_ris_open loads it. A duplicate name and unknown folder or project ids are refused before anything is sent. Runs with the login of the desktop session."
+        },
+        {
+          "name": "rillsoft_portfolio_ris_delete",
+          "title": "Delete RIS portfolio",
+          "access": "write, destructive",
+          "params": [
+            {
+              "name": "portfolioId",
+              "required": true
+            }
+          ],
+          "description": "Deletes a portfolio of the logged-in client on the Rillsoft Integration Server - the 'Delete' button of the portfolio dialog. The server deactivates the portfolio record (soft delete); the projects stay untouched. The portfolio that is open right now is refused (portfolio_is_open; call rillsoft_project_create first). Takes effect at once: no undo step. rillsoft_portfolio_ris_create is the counterpart. Runs with the login of the desktop session."
+        },
+        {
+          "name": "rillsoft_portfolio_ris_list",
+          "title": "List RIS portfolios",
+          "access": "read-only",
+          "params": [
+            {
+              "name": "combine",
+              "required": false
+            }
+          ],
+          "description": "Lists the portfolios of the logged-in client on the Rillsoft Integration Server - project portfolios and summary projects - with their folders, the projects they resolve to and the portfolioId that rillsoft_portfolio_ris_open takes. Runs with the login of the desktop session and never asks for credentials; the answer names server, userName and clientId. A portfolio file (.rpp) is opened through rillsoft_portfolio_file_open instead. Read-only, no undo step."
+        },
+        {
+          "name": "rillsoft_portfolio_ris_open",
+          "title": "Open RIS portfolio",
+          "access": "write, destructive",
+          "params": [
+            {
+              "name": "portfolioId",
+              "required": true
+            },
+            {
+              "name": "discardChanges",
+              "required": false
+            },
+            {
+              "name": "lock",
+              "required": false
+            },
+            {
+              "name": "projectIds",
+              "required": false
+            },
+            {
+              "name": "readOnlyProjectIds",
+              "required": false
+            }
+          ],
+          "description": "Opens a portfolio of the logged-in client from the Rillsoft Integration Server - all of its projects or a subset - and replaces the current document with a portfolio: an evaluation view across projects in which most mutating tools are refused. Projects with a foreign resource pool or that cannot be read are left out and named in skipped. With unsaved changes pending, discardChanges:true is required. Saving goes back through rillsoft_portfolio_ris_save; a portfolio file is opened through rillsoft_portfolio_file_open instead. No undo step - the command history starts over. Runs with the login of the desktop session."
+        },
+        {
+          "name": "rillsoft_portfolio_ris_save",
+          "title": "Save RIS portfolio",
+          "access": "write, destructive",
+          "params": [
+            {
+              "name": "notes",
+              "required": false
+            }
+          ],
+          "description": "Writes the open portfolio of the Rillsoft Integration Server back: every project that changed and is not read-only gets a new version on the server (saved names them), cross-project links and the portfolio's configuration, favourites and signature are written along, then the portfolio is reloaded from the server keeping its display state. Nothing changed means nothing written and a note. Refused where the open document is not a portfolio of the server (ris_portfolio_not_open; a single project is saved through rillsoft_project_ris_save, a portfolio file through rillsoft_portfolio_project_files_save). A link cycle stops the save and is named in note. Runs with the login of the desktop session. No undo step."
+        },
+        {
+          "name": "rillsoft_portfolio_ris_update",
+          "title": "Update RIS portfolio",
+          "access": "write",
+          "params": [
+            {
+              "name": "portfolioId",
+              "required": true
+            },
+            {
+              "name": "folderIds",
+              "required": false
+            },
+            {
+              "name": "name",
+              "required": false
+            },
+            {
+              "name": "projectIds",
+              "required": false
+            }
+          ],
+          "description": "Renames a portfolio of the logged-in client on the Rillsoft Integration Server and/or replaces its folder and project selection - the properties dialog and the in-place rename of the portfolio dialog. At least one of name, folderIds and projectIds is required; the kind (summary project or portfolio) cannot be changed. Takes effect on the server at once: no undo step. Where the portfolio is open right now, the change shows with the next rillsoft_portfolio_ris_open and note says so. Runs with the login of the desktop session."
+        }
+      ]
+    },
+    {
+      "id": "ris-documents",
+      "title": "RIS documents and folders",
+      "tools": [
+        {
+          "name": "rillsoft_document_ris_create",
+          "title": "Attach RIS document",
+          "access": "write",
+          "params": [
+            {
+              "name": "folderId",
+              "required": true
+            },
+            {
+              "name": "path",
+              "required": true
+            },
+            {
+              "name": "description",
+              "required": false
+            },
+            {
+              "name": "uuid",
+              "required": false
+            }
+          ],
+          "description": "Stores a local file as a new document in the document management of the Rillsoft Integration Server and hangs it on a task, a subproject or the project itself - the 'Add' button of the documents page. Today the server accepts documents on tasks only: a subproject or the project itself answers ris_not_found (the text says why), so give the uuid of a task. Takes effect on the server at once: no undo step, the project itself is not marked as changed, and rillsoft_history_undo does not take it back; rillsoft_document_ris_delete removes it. Requires the project to be stored on the server (rillsoft_project_ris_save_as first for a new one), the DMS license function and the create role; the answer is the document as the server holds it afterwards."
+        },
+        {
+          "name": "rillsoft_document_ris_delete",
+          "title": "Delete RIS document",
+          "access": "write, destructive",
+          "params": [
+            {
+              "name": "documentId",
+              "required": true
+            }
+          ],
+          "description": "Deletes one document of the open project from the document management of the Rillsoft Integration Server - the 'Delete' button of the documents page. The server deactivates it (soft delete; an administrator can restore it there). Takes effect at once: no undo step, the project itself is not marked as changed. A document that is already gone answers ris_not_found. rillsoft_document_ris_create is the counterpart. Runs with the login of the desktop session; needs the delete role."
+        },
+        {
+          "name": "rillsoft_document_ris_get",
+          "title": "Download RIS document",
+          "access": "read-only",
+          "params": [
+            {
+              "name": "documentId",
+              "required": true
+            },
+            {
+              "name": "path",
+              "required": true
+            },
+            {
+              "name": "overwrite",
+              "required": false
+            }
+          ],
+          "description": "Downloads one document of the open project from the document management of the Rillsoft Integration Server into a local file - the 'Download' button of the documents page, with the target path given instead of asked. An existing file at path is refused unless overwrite:true; on any failure no partial file is left behind. The document itself is not changed; rillsoft_document_ris_list names the ids. Runs with the login of the desktop session. No undo step."
+        },
+        {
+          "name": "rillsoft_document_ris_list",
+          "title": "List RIS documents",
+          "access": "read-only",
+          "params": [
+            {
+              "name": "uuid",
+              "required": false
+            }
+          ],
+          "description": "Lists the documents the document management (DMS) of the Rillsoft Integration Server holds for the open project - files hanging on a task, a subproject or the project itself - together with the DMS folder tree of the client. Each document names the element it hangs on (uuid), its folder (folderId, folderPath) and the documentId the other document tools take. Requires a project opened from the server (rillsoft_project_ris_open) or stored there (rillsoft_project_ris_save_as); a new or file-based project has no documents. Reads the server every time; runs with the login of the desktop session. Read-only, no undo step. Not to be confused with the project files rillsoft_project_file_open handles."
+        },
+        {
+          "name": "rillsoft_document_ris_update",
+          "title": "Update RIS document",
+          "access": "write, destructive",
+          "params": [
+            {
+              "name": "documentId",
+              "required": true
+            },
+            {
+              "name": "description",
+              "required": false
+            },
+            {
+              "name": "folderId",
+              "required": false
+            },
+            {
+              "name": "path",
+              "required": false
+            }
+          ],
+          "description": "Changes the description, the DMS folder and/or the content of one document in the document management of the Rillsoft Integration Server - editing the description in the list, dragging it into a folder and the 'Upload' button of the documents page. At least one of description, folderId and path is required; the element the document hangs on cannot be changed (delete and attach again). Replacing the content with path is destructive: the stored file is overwritten and its name follows the new file. Takes effect on the server at once - no undo step, the project itself is not marked as changed. Without a path and without a difference nothing is sent. Runs with the login of the desktop session; needs the modify role."
+        },
+        {
+          "name": "rillsoft_folder_ris_create",
+          "title": "Create RIS folder",
+          "access": "write",
+          "params": [
+            {
+              "name": "name",
+              "required": true
+            },
+            {
+              "name": "parentFolderId",
+              "required": true
+            }
+          ],
+          "description": "Creates a subfolder in the project folder tree of the logged-in client on the Rillsoft Integration Server - the 'New folder' button of the folder dialog. Takes effect on the server at once: no undo step; rillsoft_folder_ris_delete removes it. An unknown parent is refused before anything is sent. Runs with the login of the desktop session."
+        },
+        {
+          "name": "rillsoft_folder_ris_delete",
+          "title": "Delete RIS folder",
+          "access": "write, destructive",
+          "params": [
+            {
+              "name": "folderId",
+              "required": true
+            }
+          ],
+          "description": "Deletes an empty project folder of the logged-in client on the Rillsoft Integration Server - the 'Delete folder' button of the folder dialog. A folder that still holds subfolders or projects is refused (ris_folder_not_empty); nothing disappears silently. The server deactivates the folder (soft delete). Takes effect at once: no undo step. rillsoft_folder_ris_create is the counterpart. Runs with the login of the desktop session."
+        },
+        {
+          "name": "rillsoft_folder_ris_list",
+          "title": "List RIS folders",
+          "access": "read-only",
+          "params": [
+            {
+              "name": "permission",
+              "required": false
+            }
+          ],
+          "description": "Lists the project folder tree of the logged-in client on the Rillsoft Integration Server - the tree of the 'Open from database' dialog - with parentFolderId, path and depth per folder, so no nested-set arithmetic is needed; the folderId is what rillsoft_project_ris_save_as and the other folder tools take. Not the DMS folder tree of the documents (rillsoft_document_ris_list). Runs with the login of the desktop session. Read-only, no undo step."
+        },
+        {
+          "name": "rillsoft_folder_ris_move",
+          "title": "Move RIS folder",
+          "access": "write",
+          "params": [
+            {
+              "name": "folderId",
+              "required": true
+            },
+            {
+              "name": "targetFolderId",
+              "required": true
+            },
+            {
+              "name": "position",
+              "required": false
+            }
+          ],
+          "description": "Moves a project folder of the logged-in client on the Rillsoft Integration Server under another folder or next to it, with its subfolders and projects - dragging in the folder dialog, plus the sibling positions the server offers. A folder cannot go under itself or one of its subfolders (ris_folder_cycle). Renaming is rillsoft_folder_ris_update; a project changes its folder through rillsoft_project_ris_save_as. Takes effect at once: no undo step. Runs with the login of the desktop session."
+        },
+        {
+          "name": "rillsoft_folder_ris_update",
+          "title": "Rename RIS folder",
+          "access": "write",
+          "params": [
+            {
+              "name": "folderId",
+              "required": true
+            },
+            {
+              "name": "name",
+              "required": true
+            }
+          ],
+          "description": "Renames a project folder of the logged-in client on the Rillsoft Integration Server - editing the label in the folder dialog. The same name again sends nothing. Moving a folder is rillsoft_folder_ris_move. Takes effect on the server at once: no undo step. Runs with the login of the desktop session."
+        }
+      ]
+    },
+    {
+      "id": "view",
+      "title": "View, window and session",
+      "tools": [
+        {
+          "name": "rillsoft_history_redo",
+          "title": "Redo command",
+          "access": "write",
+          "params": [],
+          "description": "Redoes the undo step taken back last and reports the command that was redone. The counterpart to rillsoft_history_undo; it restores the step and takes nothing away, which is why it carries no destructive hint. One undo step."
+        },
+        {
+          "name": "rillsoft_history_undo",
+          "title": "Undo command",
+          "access": "write, destructive",
+          "params": [],
+          "description": "Undoes the last undo step, including changes made in the user interface, and reports the command that was undone. It walks the command history of the open project; it is not a way to undo a save, and the resource pool has no undo step at all - there the unit of work is closed without saving instead. Taking the step back again goes through rillsoft_history_redo. One undo step."
+        },
+        {
+          "name": "rillsoft_property_panel_close",
+          "title": "Close property sheet",
+          "access": "read-only",
+          "params": [],
+          "description": "Switches the property sheet back to the info sheet. Where the info sheet is open already it does nothing, and that is not an error. No undo step, no change to the project. It answers like rillsoft_property_panel_get."
+        },
+        {
+          "name": "rillsoft_property_panel_get",
+          "title": "Read property sheet",
+          "access": "read-only",
+          "params": [],
+          "description": "Reads the property sheet in the info window: type (info, task, project, subproject, portfolio, combination, other), uuid, number and name of the element shown, activeTab, availableTabs[] and infoPanelVisible. Read-only, no undo step."
+        },
+        {
+          "name": "rillsoft_property_panel_open",
+          "title": "Open property sheet",
+          "access": "read-only",
+          "params": [
+            {
+              "name": "number",
+              "required": false
+            },
+            {
+              "name": "tab",
+              "required": false
+            },
+            {
+              "name": "uuid",
+              "required": false
+            }
+          ],
+          "description": "Shows a task, a subproject or the project in the property sheet of the info window, optionally on a named tab. A hidden info window is shown for that (for the running session only). The element gets selected and scrolled into view along the way - the selection is part of the picture. Purely navigational: values are set through rillsoft_task_update, rillsoft_subproject_update and the other writing tools. No undo step, no change to the project. It answers like rillsoft_property_panel_get."
+        },
+        {
+          "name": "rillsoft_row_selection_apply",
+          "title": "Apply row selection",
+          "access": "read-only",
+          "params": [
+            {
+              "name": "row",
+              "required": true
+            }
+          ],
+          "description": "Selects one row of the visible resource or capacity view - the same effect as clicking it. The row is scrolled into view and the property sheet of the info window follows, exactly as it does on a click. A row whose parent is collapsed is not addressable; open it first through rillsoft_outline_apply. In any other view the call fails and points at rillsoft_view_state_apply. No undo step and no change to the plan itself - no task, no assignment, no date moves; that is why this tool counts as read-only. What it does change is the way the project is displayed: the selected row is stored with the project, and going through the user interface marks the document as changed, so a later save writes it along. Pass taskUuid inside row to select a task listed under that row instead of the row itself - the detail rows have no coordinate of their own, they hang below their group row; that is what makes the gantt secondary view show the task with its links. It answers like rillsoft_row_selection_get."
+        },
+        {
+          "name": "rillsoft_row_selection_get",
+          "title": "Read row selection",
+          "access": "read-only",
+          "params": [],
+          "description": "Reads which row of the visible resource or capacity view is selected, in the same coordinates the report uses per row. selected:false means none is. In any other view the call fails and points at rillsoft_view_state_apply. Read-only, no undo step."
+        },
+        {
+          "name": "rillsoft_session_dialogs_set",
+          "title": "Set recording mode for message boxes",
+          "access": "read-only",
+          "params": [
+            {
+              "name": "visible",
+              "required": true
+            },
+            {
+              "name": "autoAnswer",
+              "required": false
+            },
+            {
+              "name": "autoCloseSeconds",
+              "required": false
+            },
+            {
+              "name": "scope",
+              "required": false
+            }
+          ],
+          "description": "Switches the recording mode of this session: with visible true, every following call that would show a message box in the user interface - a warning, a hint, the question about moving fixed dates - shows the real box on screen for screenshots, and a timer closes it after autoCloseSeconds with the answer chosen by autoAnswer. A person who clicks earlier wins. The call that showed a box returns only once the box is closed, so run it in the background and take the picture meanwhile; every other tools/call sent while a box stands is refused with dialog_open and the remaining seconds. Each box shown is reported in _meta.dialogs[] of the answer with title, text, buttons, answer and shownMs. After a server start the mode is off. No undo step, no change to the project. It answers with the state now in force."
+        },
+        {
+          "name": "rillsoft_timescale_apply",
+          "title": "Apply time scale",
+          "access": "write",
+          "params": [
+            {
+              "name": "level",
+              "required": false
+            },
+            {
+              "name": "subdivision",
+              "required": false
+            },
+            {
+              "name": "unit",
+              "required": false
+            }
+          ],
+          "description": "Applies the time scale of the time axis - either through level or through unit plus subdivision. A pure display property: tasks, dates, assignments, calendars and baselines stay untouched. One undo step; a level already set creates none."
+        },
+        {
+          "name": "rillsoft_view_columns_apply",
+          "title": "Apply columns of the view",
+          "access": "read-only",
+          "params": [
+            {
+              "name": "columns",
+              "required": false
+            },
+            {
+              "name": "order",
+              "required": false
+            }
+          ],
+          "description": "Shows, hides, sizes and arranges columns of the list on the left of the visible view - the same effect as the context menu of the column header, dragging its edge and the column arrangement dialog. Give order, columns or both; a call with neither is rejected. Under columns only the columns named are touched, and a column that already stands as asked is left alone, so the call can be repeated. Rejected in plain words: an unknown column name, hiding a column the context menu greys out, a width on a column that stays hidden ({ visible: true, width: X } in one entry shows it and sizes it in one go), and an order that leaves a column out or names one twice. The list at the bottom of a view with a second chart is not addressable. No undo step and no change to the plan itself - no task, no assignment, no date moves; that is why this tool counts as read-only. What it does change is the way the project is displayed: the column state is stored with the project, and going through the user interface marks the document as changed, so a later save writes it along. It answers like rillsoft_view_columns_get."
+        },
+        {
+          "name": "rillsoft_view_columns_get",
+          "title": "Read columns of the view",
+          "access": "read-only",
+          "params": [],
+          "description": "Reads the columns of the list on the left of the visible view - the Gantt chart, the three variance views and the resource and capacity views carry one. Per column it gives name (the contract name), caption (the heading in the language of the running program), visible, width in neutral units and toggleable, in display order and hidden columns included. The field order repeats that display order as a plain list of names, ready to be passed back to rillsoft_view_columns_apply. In the network diagram and the bar network diagram there is no such list and the call fails, pointing at rillsoft_view_state_apply. Read-only, no undo step."
+        },
+        {
+          "name": "rillsoft_view_favorite_create",
+          "title": "Create favourite view",
+          "access": "write",
+          "params": [
+            {
+              "name": "name",
+              "required": true
+            }
+          ],
+          "description": "Saves the visible view as a favourite view under 'name': view type, grouping, filter, time window, column layout and time scale as they are right now - rillsoft_view_state_apply and rillsoft_view_columns_apply shape it beforehand. The visible view stays as it is; switching to the favourite goes through rillsoft_view_favorite_select, removing it through rillsoft_view_favorite_delete. One undo step."
+        },
+        {
+          "name": "rillsoft_view_favorite_delete",
+          "title": "Delete favourite view",
+          "access": "write, destructive",
+          "params": [
+            {
+              "name": "name",
+              "required": true
+            }
+          ],
+          "description": "Deletes the favourite view 'name' from the project. The favourite view that is visible right now cannot be deleted - switch to another view with rillsoft_view_state_apply first; any other favourite can go while it stays visible. Only the saved view goes; the project keeps its planning data untouched. Listing what exists goes through rillsoft_view_favorite_list. One undo step."
+        },
+        {
+          "name": "rillsoft_view_favorite_list",
+          "title": "List favourite views",
+          "access": "read-only",
+          "params": [],
+          "description": "Reads the favourite views of the project (name and the view each one was saved from), where they are stored, and which one is visible right now. Switching to one goes through rillsoft_view_favorite_select. Read-only, no undo step."
+        },
+        {
+          "name": "rillsoft_view_favorite_select",
+          "title": "Select favourite view",
+          "access": "write",
+          "params": [
+            {
+              "name": "name",
+              "required": true
+            }
+          ],
+          "description": "Switches the visible view to the favourite view 'name', the same way as the favourites menu: afterwards rillsoft_view_state_get reports 'favorite' next to the underlying view name. It only changes what is shown, nothing in the project - and like every view switch it is no undo step. Creating and deleting favourites go through rillsoft_view_favorite_create and rillsoft_view_favorite_delete."
+        },
+        {
+          "name": "rillsoft_view_state_apply",
+          "title": "Apply view state",
+          "access": "write",
+          "params": [
+            {
+              "name": "application",
+              "required": false
+            },
+            {
+              "name": "baseline",
+              "required": false
+            },
+            {
+              "name": "note",
+              "required": false
+            },
+            {
+              "name": "taskFilter",
+              "required": false
+            },
+            {
+              "name": "timeFilter",
+              "required": false
+            },
+            {
+              "name": "timescale",
+              "required": false
+            },
+            {
+              "name": "view",
+              "required": false
+            }
+          ],
+          "description": "Switches the visible view ('view.name', for example gantt or employee) and sets its state - grouping, presentation, secondary view, time and task filter, time scale, application-wide switches - in the shape of the rillsoft_view_state_get answer: reading it and applying it back restores the state exactly. Informational fields (baseline, note, favorite) are ignored; rillsoft_baseline_select is what switches the baseline, and rillsoft_view_favorite_select is what switches to a favourite view. At least one section is required. One undo step."
+        },
+        {
+          "name": "rillsoft_view_state_get",
+          "title": "Read view state",
+          "access": "read-only",
+          "params": [],
+          "description": "Reads the complete visible view state in one answer: 'view' (its name including the task views, grouping, presentation, secondary view together with secondary chart and cost curve; while a favourite view is visible also 'favorite' with its name next to the underlying view), 'timescale', 'timeFilter', 'taskFilter' and 'baseline'. Read-only, no undo step."
+        },
+        {
+          "name": "rillsoft_window_layout_apply",
+          "title": "Apply window layout",
+          "access": "read-only",
+          "params": [
+            {
+              "name": "height",
+              "required": false
+            },
+            {
+              "name": "infoPanel",
+              "required": false
+            },
+            {
+              "name": "ribbon",
+              "required": false
+            },
+            {
+              "name": "statusBar",
+              "required": false
+            },
+            {
+              "name": "width",
+              "required": false
+            }
+          ],
+          "description": "Applies the window state for reproducible screenshots; at least one parameter is required, and sizes left out stay as they are. It answers like rillsoft_window_layout_get. No undo step, no change to the project. The state holds for the running session only."
+        },
+        {
+          "name": "rillsoft_window_layout_get",
+          "title": "Read window layout",
+          "access": "read-only",
+          "params": [],
+          "description": "Reads the window state: width and height of the visible client area, windowWidth and windowHeight including the frame, dpi, maximized, infoPanel (the docking bar holding the property sheet), statusBar and ribbon (normal or minimized). Read-only, no undo step."
+        }
+      ]
+    }
+  ]
+}

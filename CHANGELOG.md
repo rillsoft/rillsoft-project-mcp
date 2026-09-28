@@ -4,7 +4,8 @@
 
 - Tool catalogue `TOOLS.md` and raw `tools-list.json` generated from
   `tools/list` of Rillsoft Project 10.0.624.0 (118 tools) by
-  `scripts/generate_tools.py`.
+  `scripts/generate_tools.py`; `tools-catalogue.json` (grouped, without
+  schemas) is the source of the catalogue on rillsoft.ai.
 
 - Published to the official MCP Registry as `ai.rillsoft/rillsoft-project`
   version 10.0.0 (namespace verified via DNS on `rillsoft.ai`).

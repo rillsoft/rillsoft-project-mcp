@@ -1,17 +1,19 @@
 """Generate the tool catalogue from tools/list of a running Rillsoft Project.
 
 Usage:
-    python scripts/generate_tools.py                  # query 127.0.0.1:3928, write both files
+    python scripts/generate_tools.py                  # query 127.0.0.1:3928, write all files
     python scripts/generate_tools.py --port 8123
-    python scripts/generate_tools.py --from-json      # rebuild TOOLS.md from tools-list.json
+    python scripts/generate_tools.py --from-json      # rebuild from tools-list.json
 
 An API key, if one is set in Rillsoft Project, is read from the environment
 variable RILLSOFT_MCP_KEY. The script only calls initialize and tools/list and
 closes the session with DELETE; it changes nothing in the open project.
 
 Writes:
-    tools-list.json  raw tools/list result with serverInfo and capture date
-    TOOLS.md         readable catalogue; never edit by hand
+    tools-list.json       raw tools/list result with serverInfo and capture date
+    tools-catalogue.json  the same, grouped into sections without schemas --
+                          source of the catalogue on rillsoft.ai (data/mcp_tools.json)
+    TOOLS.md              readable catalogue; never edit by hand
 """
 
 import argparse
@@ -23,21 +25,23 @@ import urllib.request
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 JSON_FILE = ROOT / "tools-list.json"
+CATALOGUE_FILE = ROOT / "tools-catalogue.json"
 MD_FILE = ROOT / "TOOLS.md"
 PROTOCOL = "2025-06-18"
 
-# Section per object, taken from the second part of the tool name.
+# Section per object, taken from the second part of the tool name. The id is
+# stable; rillsoft.ai translates the title through the i18n key tools_section_<id>.
 SECTIONS = [
-    ("Projects and files", ["project"]),
-    ("Structure: subprojects, elements and outline", ["subproject", "element", "fixed", "outline"]),
-    ("Tasks, assignments and progress", ["task"]),
-    ("Resources and resource pool", ["resource", "machine"]),
-    ("Calendars", ["calendar"]),
-    ("Baselines and variance", ["baseline", "variance"]),
-    ("Analysis", ["analysis"]),
-    ("Portfolios", ["portfolio"]),
-    ("RIS documents and folders", ["document", "folder"]),
-    ("View, window and session", ["view", "timescale", "row", "property", "window", "history", "session"]),
+    ("projects", "Projects and files", ["project"]),
+    ("structure", "Structure: subprojects, elements and outline", ["subproject", "element", "fixed", "outline"]),
+    ("tasks", "Tasks, assignments and progress", ["task"]),
+    ("resources", "Resources and resource pool", ["resource", "machine"]),
+    ("calendars", "Calendars", ["calendar"]),
+    ("baselines", "Baselines and variance", ["baseline", "variance"]),
+    ("analysis", "Analysis", ["analysis"]),
+    ("portfolios", "Portfolios", ["portfolio"]),
+    ("ris-documents", "RIS documents and folders", ["document", "folder"]),
+    ("view", "View, window and session", ["view", "timescale", "row", "property", "window", "history", "session"]),
 ]
 
 RIS_NOTE = (
@@ -102,24 +106,50 @@ def params(tool):
     required = set(schema.get("required") or [])
     names = list((schema.get("properties") or {}).keys())
     names.sort(key=lambda n: (n not in required, n))
-    return ", ".join(f"`{n}`" + ("\\*" if n in required else "") for n in names) or "–"
+    return [{"name": n, "required": n in required} for n in names]
 
 
-def render(data):
+def catalogue(data):
     tools = sorted(data["tools"], key=lambda t: t["name"])
-    version = data["serverInfo"]["version"]
-    count = {k: sum(access(t) == k for t in tools) for k in ("read-only", "write", "write, destructive")}
+    sections, seen = [], set()
+    for sid, title, keys in SECTIONS:
+        items = [t for t in tools if t["name"].split("_")[1] in keys]
+        seen.update(t["name"] for t in items)
+        sections.append((sid, title, items))
+    sections.append(("other", "Other", [t for t in tools if t["name"] not in seen]))
+    kinds = [access(t) for t in tools]
+    return {
+        "version": data["serverInfo"]["version"],
+        "capturedAt": data["capturedAt"],
+        "protocolVersion": data["protocolVersion"],
+        "count": {
+            "total": len(tools),
+            "readOnly": kinds.count("read-only"),
+            "write": len(tools) - kinds.count("read-only"),
+            "destructive": kinds.count("write, destructive"),
+        },
+        "sections": [
+            {"id": sid, "title": title, "tools": [
+                {"name": t["name"], "title": t.get("title", ""), "access": access(t),
+                 "params": params(t), "description": t.get("description", "").strip()}
+                for t in items]}
+            for sid, title, items in sections if items
+        ],
+    }
+
+
+def render(cat):
+    count = cat["count"]
     out = [
         "# Tool catalogue",
         "",
-        f"Generated from `tools/list` of Rillsoft Project **{version}** on "
-        f"{data['capturedAt']} (MCP protocol `{data['protocolVersion']}`) by "
+        f"Generated from `tools/list` of Rillsoft Project **{cat['version']}** on "
+        f"{cat['capturedAt']} (MCP protocol `{cat['protocolVersion']}`) by "
         "`scripts/generate_tools.py`. Do not edit by hand – the running program is "
         "the contract; what `tools/list` of your installation returns applies.",
         "",
-        f"{len(tools)} tools: {count['read-only']} read-only, "
-        f"{count['write'] + count['write, destructive']} writing "
-        f"(of which {count['write, destructive']} marked destructive). "
+        f"{count['total']} tools: {count['readOnly']} read-only, {count['write']} writing "
+        f"(of which {count['destructive']} marked destructive). "
         "Names, titles, descriptions and parameters are English in every language build. "
         "Undo, read-only mode, errors and sessions: "
         "[Developers: the MCP server contract](https://rillsoft.ai/en/developers/). "
@@ -137,41 +167,38 @@ def render(data):
         "## Contents",
         "",
     ]
-    grouped, seen = [], set()
-    for title, keys in SECTIONS:
-        items = [t for t in tools if t["name"].split("_")[1] in keys]
-        seen.update(t["name"] for t in items)
-        grouped.append((title, items))
-    rest = [t for t in tools if t["name"] not in seen]
-    if rest:
-        grouped.append(("Other", rest))
-    grouped = [(title, items) for title, items in grouped if items]
-
-    for title, items in grouped:
-        anchor = "".join(c for c in title.lower().replace(" ", "-") if c.isalnum() or c == "-")
-        out.append(f"- [{title}](#{anchor}) ({len(items)})")
-    for title, items in grouped:
-        out += ["", f"## {title}", "", "| Tool | Title | Access |", "|---|---|---|"]
-        out += [f"| [`{t['name']}`](#{t['name']}) | {t.get('title', '')} | {access(t)} |" for t in items]
-        for t in items:
+    for s in cat["sections"]:
+        anchor = "".join(c for c in s["title"].lower().replace(" ", "-") if c.isalnum() or c == "-")
+        out.append(f"- [{s['title']}](#{anchor}) ({len(s['tools'])})")
+    for s in cat["sections"]:
+        out += ["", f"## {s['title']}", "", "| Tool | Title | Access |", "|---|---|---|"]
+        out += [f"| [`{t['name']}`](#{t['name']}) | {t['title']} | {t['access']} |" for t in s["tools"]]
+        for t in s["tools"]:
+            plist = ", ".join(f"`{p['name']}`" + ("\\*" if p["required"] else "") for p in t["params"]) or "–"
             out += ["", f"### {t['name']}", "",
-                    f"**{t.get('title', '')}** · {access(t)} · Parameters: {params(t)}", "",
-                    t.get("description", "").strip()]
+                    f"**{t['title']}** · {t['access']} · Parameters: {plist}", "",
+                    t["description"]]
     return "\n".join(out) + "\n"
+
+
+def write(path, text):
+    path.write_text(text, encoding="utf-8", newline="\n")
 
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--port", type=int, default=3928)
-    ap.add_argument("--from-json", action="store_true", help="rebuild TOOLS.md from tools-list.json")
+    ap.add_argument("--from-json", action="store_true", help="rebuild from tools-list.json")
     args = ap.parse_args()
     if args.from_json:
         data = json.loads(JSON_FILE.read_text(encoding="utf-8"))
     else:
         data = query(args.port)
-        JSON_FILE.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
-    MD_FILE.write_text(render(data), encoding="utf-8", newline="\n")
-    print(f"{data['serverInfo']['version']}: {len(data['tools'])} tools -> {MD_FILE.name}")
+        write(JSON_FILE, json.dumps(data, ensure_ascii=False, indent=2) + "\n")
+    cat = catalogue(data)
+    write(CATALOGUE_FILE, json.dumps(cat, ensure_ascii=False, indent=2) + "\n")
+    write(MD_FILE, render(cat))
+    print(f"{cat['version']}: {cat['count']['total']} tools -> {MD_FILE.name}, {CATALOGUE_FILE.name}")
 
 
 if __name__ == "__main__":
