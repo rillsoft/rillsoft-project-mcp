@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-09-28",
+  "capturedAt": "2026-09-29",
   "serverInfo": {
     "name": "rillsoft-project",
     "title": "Rillsoft Project",
@@ -1715,7 +1715,7 @@
         "readOnlyHint": true,
         "title": "List RIS documents"
       },
-      "description": "Lists the documents the document management (DMS) of the Rillsoft Integration Server holds for the open project - files hanging on a task, a subproject or the project itself - together with the DMS folder tree of the client. Each document names the element it hangs on (uuid), its folder (folderId, folderPath) and the documentId the other document tools take. Requires a project opened from the server (rillsoft_project_ris_open) or stored there (rillsoft_project_ris_save_as); a new or file-based project has no documents. Reads the server every time; runs with the login of the desktop session. Read-only, no undo step. Not to be confused with the project files rillsoft_project_file_open handles.",
+      "description": "Lists the documents the document management (DMS) of the Rillsoft Integration Server holds for the open project - files hanging on a task, a subproject or the project itself - together with the DMS folder tree of the client. In an open RIS portfolio it lists the documents of every loaded project (each names its projectId; the answer carries portfolioId), and downloading, updating and deleting work there too - only creating is refused, as in the documents dialog. Each document names the element it hangs on (uuid), its folder (folderId, folderPath) and the documentId the other document tools take. Requires a project opened from the server (rillsoft_project_ris_open) or stored there (rillsoft_project_ris_save_as); a new or file-based project has no documents. Reads the server every time; runs with the login of the desktop session. Read-only, no undo step. Not to be confused with the project files rillsoft_project_file_open handles.",
       "inputSchema": {
         "additionalProperties": false,
         "properties": {
@@ -1833,8 +1833,12 @@
             },
             "type": "array"
           },
+          "portfolioId": {
+            "description": "id of the open portfolio on the server; only while a RIS portfolio is open",
+            "type": "integer"
+          },
           "projectId": {
-            "description": "id of the open project on the server",
+            "description": "id of the open project on the server; -1 while a portfolio is open, each document then names its own",
             "type": "integer"
           },
           "server": {
@@ -4018,7 +4022,7 @@
         "readOnlyHint": false,
         "title": "Open portfolio file"
       },
-      "description": "Opens exactly one file portfolio (.rpp), which is a list of project files, and replaces the current project. A single project file (.rpj) is refused; rillsoft_project_file_open covers that. The answer carries portfolio:true and projects[] (uuid, name, path, readOnly); lines of the .rpp that point nowhere end up in skipped[], anything else the loader has to say in note. Inside a portfolio the writing tools are refused - it is a view for evaluating several projects. No undo step.",
+      "description": "Opens exactly one file portfolio (.rpp), which is a list of project files, and replaces the current project. A single project file (.rpj) is refused; rillsoft_project_file_open covers that. The answer carries portfolio:true and projects[] (uuid, name, path, readOnly); lines of the .rpp that point nowhere end up in skipped[], anything else the loader has to say in note. Inside a portfolio the tools work as in a single project, with the limits of the user interface: nothing is created directly below the portfolio, no task or subproject changes its project, no dependency crosses the project boundary in a file portfolio, no baseline, no 'save as'; rillsoft_portfolio_project_files_save writes the changed projects back. No undo step.",
       "inputSchema": {
         "additionalProperties": false,
         "properties": {
@@ -4581,7 +4585,7 @@
         "readOnlyHint": false,
         "title": "Open RIS portfolio"
       },
-      "description": "Opens a portfolio of the logged-in client from the Rillsoft Integration Server - all of its projects or a subset - and replaces the current document with a portfolio: an evaluation view across projects in which most mutating tools are refused. Projects with a foreign resource pool or that cannot be read are left out and named in skipped. With unsaved changes pending, discardChanges:true is required. Saving goes back through rillsoft_portfolio_ris_save; a portfolio file is opened through rillsoft_portfolio_file_open instead. No undo step - the command history starts over. Runs with the login of the desktop session.",
+      "description": "Opens a portfolio of the logged-in client from the Rillsoft Integration Server - all of its projects or a subset - and replaces the current document with a portfolio: the tools work there as in a single project, with the limits of the user interface (nothing directly below the portfolio, no task or subproject changes its project, a dependency across the project boundary becomes a RIS link, no baseline, no 'save as'; documents of the loaded projects can be listed, downloaded, updated and deleted, not created). Projects with a foreign resource pool or that cannot be read are left out and named in skipped. With unsaved changes pending, discardChanges:true is required. Saving goes back through rillsoft_portfolio_ris_save; a portfolio file is opened through rillsoft_portfolio_file_open instead. No undo step - the command history starts over. Runs with the login of the desktop session.",
       "inputSchema": {
         "additionalProperties": false,
         "properties": {
@@ -5373,7 +5377,7 @@
         "readOnlyHint": false,
         "title": "Renumber project"
       },
-      "description": "Renumbers the project - the same function as the 'Renumber' menu: pull WBS codes into a gapless sequence, align task numbers with the WBS order, normalize the structure. Worth doing after rillsoft_project_sort or after many rillsoft_element_move calls. Refused in a portfolio. One undo step.",
+      "description": "Renumbers the project - the same function as the 'Renumber' menu: pull WBS codes into a gapless sequence, align task numbers with the WBS order, normalize the structure. Worth doing after rillsoft_project_sort or after many rillsoft_element_move calls. In a portfolio only the WBS codes are pulled, as the menu does there - task numbers are assigned per project and stay. One undo step.",
       "inputSchema": {
         "additionalProperties": false,
         "properties": {},
@@ -6082,7 +6086,7 @@
         "readOnlyHint": false,
         "title": "Reorder elements"
       },
-      "description": "Reorders the elements of the project - the same ordering function as the 'Order by ...' menu. What gets reassigned are the WBS codes; task numbers stay untouched (use rillsoft_project_renumber for those). It acts on the main project and on every subproject. Refused in a portfolio. One undo step.",
+      "description": "Reorders the elements of the project - the same ordering function as the 'Order by ...' menu. What gets reassigned are the WBS codes; task numbers stay untouched (use rillsoft_project_renumber for those). It acts on the main project and on every subproject; in a portfolio on the portfolio and every project, as the menu does. One undo step.",
       "inputSchema": {
         "additionalProperties": false,
         "properties": {
@@ -7534,7 +7538,7 @@
             "type": "integer"
           },
           "categoryId": {
-            "description": "id of the project category from rillsoft_resource_pool_catalog_list (types: project_category); 0 = none. Refused in a portfolio",
+            "description": "id of the project category from rillsoft_resource_pool_catalog_list (types: project_category); 0 = none. In a portfolio refused: the tool addresses the portfolio, the field belongs to each project",
             "type": "integer"
           },
           "color": {
@@ -7542,7 +7546,7 @@
             "type": "string"
           },
           "customerId": {
-            "description": "id of the customer from rillsoft_resource_pool_catalog_list (types: project_customer); 0 = none. Refused in a portfolio",
+            "description": "id of the customer from rillsoft_resource_pool_catalog_list (types: project_customer); 0 = none. In a portfolio refused: the tool addresses the portfolio, the field belongs to each project",
             "type": "integer"
           },
           "durationStepUnit": {
@@ -7557,7 +7561,7 @@
             "type": "string"
           },
           "dynamicRedistribution": {
-            "description": "redistribute effort dynamically; permitted only with schedulingMode capacity_driven. Refused in a portfolio",
+            "description": "redistribute effort dynamically; permitted only with schedulingMode capacity_driven. In a portfolio refused: the tool addresses the portfolio, the switch belongs to each project",
             "type": "boolean"
           },
           "effortEditable": {
@@ -7582,7 +7586,7 @@
             "type": "boolean"
           },
           "planningVariant": {
-            "description": "number of the plan variant of the project; 0 = dynamic. Refused in a portfolio",
+            "description": "number of the plan variant (baseline) of the project; 0 = dynamic. Refused in a portfolio: there is no baseline there, not even per project",
             "type": "integer"
           },
           "primaryColor": {
@@ -7590,7 +7594,7 @@
             "type": "boolean"
           },
           "priority": {
-            "description": "priority of the project in percent (0 to 100), as in the dialog. Refused in a portfolio",
+            "description": "priority of the project in percent (0 to 100), as in the dialog. In a portfolio refused: the tool addresses the portfolio, the field belongs to each project",
             "maximum": 100,
             "minimum": 0,
             "type": "number"
@@ -7607,7 +7611,7 @@
             "type": "string"
           },
           "schedulingMode": {
-            "description": "capacity_driven computes with the calendars and absences of the assigned resources, deadline_driven computes without them. Refused in a portfolio",
+            "description": "capacity_driven computes with the calendars and absences of the assigned resources, deadline_driven computes without them. In a portfolio refused: the tool addresses the portfolio, the mode belongs to each project",
             "enum": [
               "capacity_driven",
               "deadline_driven"
@@ -7620,7 +7624,7 @@
             "type": "string"
           },
           "statusId": {
-            "description": "id of the project status from rillsoft_resource_pool_catalog_list (types: project_status); 0 = none. Refused in a portfolio",
+            "description": "id of the project status from rillsoft_resource_pool_catalog_list (types: project_status); 0 = none. In a portfolio refused: the tool addresses the portfolio, the field belongs to each project",
             "type": "integer"
           },
           "timeStepMinutes": {

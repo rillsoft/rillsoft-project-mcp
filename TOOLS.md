@@ -1,6 +1,6 @@
 # Tool catalogue
 
-Generated from `tools/list` of Rillsoft Project **10.0.624.0** on 2026-09-28 (MCP protocol `2025-06-18`) by `scripts/generate_tools.py`. Do not edit by hand – the running program is the contract; what `tools/list` of your installation returns applies.
+Generated from `tools/list` of Rillsoft Project **10.0.624.0** on 2026-09-29 (MCP protocol `2025-06-18`) by `scripts/generate_tools.py`. Do not edit by hand – the running program is the contract; what `tools/list` of your installation returns applies.
 
 118 tools: 37 read-only, 81 writing (of which 38 marked destructive). Names, titles, descriptions and parameters are English in every language build. Undo, read-only mode, errors and sessions: [Developers: the MCP server contract](https://rillsoft.ai/en/developers/). Output schemas are part of `tools/list` ([`tools-list.json`](tools-list.json)) and not repeated here.
 
@@ -88,7 +88,7 @@ Saves the project under a new path (.rpj). Where that file exists already, overw
 
 **Renumber project** · write · Parameters: –
 
-Renumbers the project - the same function as the 'Renumber' menu: pull WBS codes into a gapless sequence, align task numbers with the WBS order, normalize the structure. Worth doing after rillsoft_project_sort or after many rillsoft_element_move calls. Refused in a portfolio. One undo step.
+Renumbers the project - the same function as the 'Renumber' menu: pull WBS codes into a gapless sequence, align task numbers with the WBS order, normalize the structure. Worth doing after rillsoft_project_sort or after many rillsoft_element_move calls. In a portfolio only the WBS codes are pulled, as the menu does there - task numbers are assigned per project and stay. One undo step.
 
 ### rillsoft_project_reschedule
 
@@ -130,7 +130,7 @@ Stores the open single project - new, a local file or a project of the server - 
 
 **Reorder elements** · write · Parameters: `criterion`\*
 
-Reorders the elements of the project - the same ordering function as the 'Order by ...' menu. What gets reassigned are the WBS codes; task numbers stay untouched (use rillsoft_project_renumber for those). It acts on the main project and on every subproject. Refused in a portfolio. One undo step.
+Reorders the elements of the project - the same ordering function as the 'Order by ...' menu. What gets reassigned are the WBS codes; task numbers stay untouched (use rillsoft_project_renumber for those). It acts on the main project and on every subproject; in a portfolio on the portfolio and every project, as the menu does. One undo step.
 
 ### rillsoft_project_status_date_reschedule
 
@@ -642,7 +642,7 @@ Reads the resource or capacity view currently visible as a flat YAML report: ref
 
 **Open portfolio file** · write, destructive · Parameters: `path`\*, `discardChanges`
 
-Opens exactly one file portfolio (.rpp), which is a list of project files, and replaces the current project. A single project file (.rpj) is refused; rillsoft_project_file_open covers that. The answer carries portfolio:true and projects[] (uuid, name, path, readOnly); lines of the .rpp that point nowhere end up in skipped[], anything else the loader has to say in note. Inside a portfolio the writing tools are refused - it is a view for evaluating several projects. No undo step.
+Opens exactly one file portfolio (.rpp), which is a list of project files, and replaces the current project. A single project file (.rpj) is refused; rillsoft_project_file_open covers that. The answer carries portfolio:true and projects[] (uuid, name, path, readOnly); lines of the .rpp that point nowhere end up in skipped[], anything else the loader has to say in note. Inside a portfolio the tools work as in a single project, with the limits of the user interface: nothing is created directly below the portfolio, no task or subproject changes its project, no dependency crosses the project boundary in a file portfolio, no baseline, no 'save as'; rillsoft_portfolio_project_files_save writes the changed projects back. No undo step.
 
 ### rillsoft_portfolio_project_files_save
 
@@ -672,7 +672,7 @@ Lists the portfolios of the logged-in client on the Rillsoft Integration Server 
 
 **Open RIS portfolio** · write, destructive · Parameters: `portfolioId`\*, `discardChanges`, `lock`, `projectIds`, `readOnlyProjectIds`
 
-Opens a portfolio of the logged-in client from the Rillsoft Integration Server - all of its projects or a subset - and replaces the current document with a portfolio: an evaluation view across projects in which most mutating tools are refused. Projects with a foreign resource pool or that cannot be read are left out and named in skipped. With unsaved changes pending, discardChanges:true is required. Saving goes back through rillsoft_portfolio_ris_save; a portfolio file is opened through rillsoft_portfolio_file_open instead. No undo step - the command history starts over. Runs with the login of the desktop session.
+Opens a portfolio of the logged-in client from the Rillsoft Integration Server - all of its projects or a subset - and replaces the current document with a portfolio: the tools work there as in a single project, with the limits of the user interface (nothing directly below the portfolio, no task or subproject changes its project, a dependency across the project boundary becomes a RIS link, no baseline, no 'save as'; documents of the loaded projects can be listed, downloaded, updated and deleted, not created). Projects with a foreign resource pool or that cannot be read are left out and named in skipped. With unsaved changes pending, discardChanges:true is required. Saving goes back through rillsoft_portfolio_ris_save; a portfolio file is opened through rillsoft_portfolio_file_open instead. No undo step - the command history starts over. Runs with the login of the desktop session.
 
 ### rillsoft_portfolio_ris_save
 
@@ -723,7 +723,7 @@ Downloads one document of the open project from the document management of the R
 
 **List RIS documents** · read-only · Parameters: `uuid`
 
-Lists the documents the document management (DMS) of the Rillsoft Integration Server holds for the open project - files hanging on a task, a subproject or the project itself - together with the DMS folder tree of the client. Each document names the element it hangs on (uuid), its folder (folderId, folderPath) and the documentId the other document tools take. Requires a project opened from the server (rillsoft_project_ris_open) or stored there (rillsoft_project_ris_save_as); a new or file-based project has no documents. Reads the server every time; runs with the login of the desktop session. Read-only, no undo step. Not to be confused with the project files rillsoft_project_file_open handles.
+Lists the documents the document management (DMS) of the Rillsoft Integration Server holds for the open project - files hanging on a task, a subproject or the project itself - together with the DMS folder tree of the client. In an open RIS portfolio it lists the documents of every loaded project (each names its projectId; the answer carries portfolioId), and downloading, updating and deleting work there too - only creating is refused, as in the documents dialog. Each document names the element it hangs on (uuid), its folder (folderId, folderPath) and the documentId the other document tools take. Requires a project opened from the server (rillsoft_project_ris_open) or stored there (rillsoft_project_ris_save_as); a new or file-based project has no documents. Reads the server every time; runs with the login of the desktop session. Read-only, no undo step. Not to be confused with the project files rillsoft_project_file_open handles.
 
 ### rillsoft_document_ris_update
 
