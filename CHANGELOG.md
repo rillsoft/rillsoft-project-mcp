@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-09-29 (2)
+
+- Tool catalogue regenerated from Rillsoft Project 10.0.624.0 (118 tools)
+  after the follow-up to the portfolio change: `rillsoft_project_team_preference_set`
+  and `_remove` no longer say "refused in a portfolio" - there `projectUuid`
+  names a project or subproject, and the portfolio itself carries no
+  preferred team (an empty `projectUuid` is refused, as in the user
+  interface). Eleven more tools now state their portfolio limit in their own
+  description (`rillsoft_task_create`, `rillsoft_subproject_create`,
+  `rillsoft_element_move`, `rillsoft_element_subproject_group`,
+  `rillsoft_task_dependency_create`, `rillsoft_machine_sharing_create`,
+  `rillsoft_baseline_create/_select/_delete`, `rillsoft_document_ris_create`,
+  `rillsoft_project_ris_save`). No new tools, no new parameters.
+
 ## 2026-09-29
 
 - Tool catalogue regenerated from Rillsoft Project 10.0.624.0 (118 tools):

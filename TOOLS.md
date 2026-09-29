@@ -118,7 +118,7 @@ Opens a project of the logged-in client from the Rillsoft Integration Server by 
 
 **Save RIS project** · write, destructive · Parameters: `notes`
 
-Writes the open project back to the Rillsoft Integration Server as a new version of the project it was opened from (rillsoft_project_ris_open). Creates one new version on the server per call; the document is then reloaded from the server; the UUIDs of every element stay valid, and the command history is kept, so the last steps can still be undone afterwards. Refused where the open document is not a project of the server (ris_project_not_open; use rillsoft_project_ris_save_as to store it there as a new project), where it is open read-only (ris_read_only), or where the server holds a newer version or a foreign lock (ris_conflict - reopen it). A local file is saved through rillsoft_project_file_save. Runs with the login of the desktop session and never asks for credentials. No undo step.
+Writes the open project back to the Rillsoft Integration Server as a new version of the project it was opened from (rillsoft_project_ris_open). Creates one new version on the server per call; the document is then reloaded from the server; the UUIDs of every element stay valid, and the command history is kept, so the last steps can still be undone afterwards. Refused where the open document is not a project of the server (ris_project_not_open; use rillsoft_project_ris_save_as to store it there as a new project), where it is open read-only (ris_read_only), or where the server holds a newer version or a foreign lock (ris_conflict - reopen it). A local file is saved through rillsoft_project_file_save. An open portfolio is refused (a portfolio of the Integration Server is saved through rillsoft_portfolio_ris_save). Runs with the login of the desktop session and never asks for credentials. No undo step.
 
 ### rillsoft_project_ris_save_as
 
@@ -148,13 +148,13 @@ Sets the status date of the project without recomputing anything. Moving unfinis
 
 **Remove preferred team** · write, destructive · Parameters: `teamId`\*, `projectUuid`
 
-Takes the preferred team of a project or subproject back out. The counterpart of rillsoft_project_team_preference_set. An inherited preferred team is removed at the pack that carries it; under preferredTeams[] rillsoft_project_tree_get shows only the entries a pack carries itself. Where the project or subproject does not carry that team, the call fails rather than reporting a silent success. Refused in a portfolio. One undo step.
+Takes the preferred team of a project or subproject back out. The counterpart of rillsoft_project_team_preference_set. An inherited preferred team is removed at the pack that carries it; under preferredTeams[] rillsoft_project_tree_get shows only the entries a pack carries itself. Where the project or subproject does not carry that team, the call fails rather than reporting a silent success. In a portfolio projectUuid names a project or a subproject inside it, as in a single project; an empty projectUuid - the portfolio itself - is refused. One undo step.
 
 ### rillsoft_project_team_preference_set
 
 **Set preferred team** · write · Parameters: `teamId`\*, `projectUuid`
 
-Marks a team as the preferred team of a project or subproject. This is not an assignment but a preference, carrying neither utilization nor productivity: it is inherited by every subproject below, it presets the team filter in rillsoft_task_resource_candidate_list and in the dialogs, and it narrows the supply in the capacity view split by project. projectUuid addresses the main project (empty) or any subproject. Read it back through rillsoft_project_tree_get (preferredTeams[]). Team assignments on individual tasks do not exist in this contract; people are assigned through rillsoft_task_employee_assignment_set. Refused in a portfolio. One undo step.
+Marks a team as the preferred team of a project or subproject. This is not an assignment but a preference, carrying neither utilization nor productivity: it is inherited by every subproject below, it presets the team filter in rillsoft_task_resource_candidate_list and in the dialogs, and it narrows the supply in the capacity view split by project. projectUuid addresses the main project (empty) or any subproject. Read it back through rillsoft_project_tree_get (preferredTeams[]). Team assignments on individual tasks do not exist in this contract; people are assigned through rillsoft_task_employee_assignment_set. In a portfolio projectUuid names a project or a subproject inside it, as in a single project; the portfolio itself carries no preferred team (the user interface offers none there), so an empty projectUuid is refused. One undo step.
 
 ### rillsoft_project_tree_get
 
@@ -194,7 +194,7 @@ Deletes a task or a subproject, together with its dependencies respectively its 
 
 **Move element** · write · Parameters: `direction`, `extractFromSubproject`, `newParentUuid`, `number`, `position`, `uuid`, `uuids`
 
-Moves elements - here an element is a task or a subproject. Give exactly one of position with newParentUuid, direction, or extractFromSubproject. RP reassigns the WBS codes; dependencies and assignments survive. Display rows stay valid: where only part of a row moves away, the row is split cleanly. One undo step.
+Moves elements - here an element is a task or a subproject. Give exactly one of position with newParentUuid, direction, or extractFromSubproject. RP reassigns the WBS codes; dependencies and assignments survive. Display rows stay valid: where only part of a row moves away, the row is split cleanly. In a portfolio no element changes its project and none goes directly below the portfolio, as in the user interface; with direction the projects themselves can be reordered at portfolio level. One undo step.
 
 ### rillsoft_element_reorder
 
@@ -206,7 +206,7 @@ Reorders every direct child of a subproject completely and deterministically; a 
 
 **Group elements into subproject** · write · Parameters: `name`, `uuid`, `uuids`
 
-Creates a subproject and pulls the named elements into it - an element being a task or a subproject. This groups elements that already exist; creating an empty subproject goes through rillsoft_subproject_create. One undo step, which takes the new subproject away again as well. The answer names the new subproject (uuid, wbs) and the elements that were moved.
+Creates a subproject and pulls the named elements into it - an element being a task or a subproject. This groups elements that already exist; creating an empty subproject goes through rillsoft_subproject_create. In a portfolio the elements must lie inside a project - at portfolio level a new subproject would be a project, which the user interface does not offer either. One undo step, which takes the new subproject away again as well. The answer names the new subproject (uuid, wbs) and the elements that were moved.
 
 ### rillsoft_fixed_element_list
 
@@ -236,7 +236,7 @@ Opens or closes one single group row of the visible resource or capacity view - 
 
 **Create subproject** · write · Parameters: `name`\*, `finish`, `parentUuid`, `start`
 
-Creates a subproject (a summary task) and returns its UUID. It creates an empty one - grouping elements that already exist into a new subproject goes through rillsoft_element_subproject_group. Changing it afterwards goes through rillsoft_subproject_update, deleting it through rillsoft_subproject_delete. One undo step.
+Creates a subproject (a summary task) and returns its UUID. It creates an empty one - grouping elements that already exist into a new subproject goes through rillsoft_element_subproject_group. Changing it afterwards goes through rillsoft_subproject_update, deleting it through rillsoft_subproject_delete. In a portfolio parentUuid names a project or a subproject inside it - nothing is created directly below the portfolio, as in the user interface. One undo step.
 
 ### rillsoft_subproject_delete
 
@@ -278,7 +278,7 @@ Changes a subproject: name, start, finish, notes, pinning, calendar, color and c
 
 **Create task** · write · Parameters: `name`\*, `durationHours`, `finish`, `fixedType`, `milestone`, `notes`, `parentUuid`, `start`
 
-Creates a task (RP computes the dates through the calendar) and returns its UUID. Changing it afterwards goes through rillsoft_task_update, moving it in the structure through rillsoft_element_move, deleting it through rillsoft_task_delete. One undo step.
+Creates a task (RP computes the dates through the calendar) and returns its UUID. Changing it afterwards goes through rillsoft_task_update, moving it in the structure through rillsoft_element_move, deleting it through rillsoft_task_delete. In a portfolio parentUuid names a project or a subproject inside it - nothing is created directly below the portfolio, as in the user interface. One undo step.
 
 ### rillsoft_task_delete
 
@@ -290,7 +290,7 @@ Deletes a task together with its dependencies. Refused where the UUID names a su
 
 **Create dependency** · write · Parameters: `predecessorUuid`\*, `successorUuid`\*, `dependencyDistanceHours`, `dependencyDistanceType`, `type`
 
-Creates a dependency between two tasks. It links existing tasks; it does not create them, and it does not move them - RP computes the new dates from the link. Removing it again goes through rillsoft_task_dependency_delete. One undo step.
+Creates a dependency between two tasks. It links existing tasks; it does not create them, and it does not move them - RP computes the new dates from the link. Removing it again goes through rillsoft_task_dependency_delete. In a portfolio, as in the user interface: across the project boundary a file portfolio refuses the dependency; a portfolio of the Integration Server creates it on the server as a RIS link (finish-start, start-start, finish-finish or start-finish with an absolute lag). One undo step.
 
 ### rillsoft_task_dependency_delete
 
@@ -415,7 +415,7 @@ Changes the planning data of a task: name, dates, duration, notes, fixing, displ
 
 **Share machine** · write, destructive · Parameters: `resourceId`\*, `taskUuids`\*, `type`\*
 
-Lets several tasks share one machine or machine role: the individual assignments go away and the resource is consumed once instead of n times - one crane used by three tasks is one crane. Beware, this loses information: quantity and utilization of the shared entry are the maximum over all participants, exactly as in the 'Share' menu. rillsoft_machine_sharing_release is therefore not an inverse - a task taken back out gets the shared value, not its original one. Afterwards the resource appears in rillsoft_project_tree_get under sharedAssignments[] and no longer under machineAssignments[] or machineRoleAssignments[]. One undo step.
+Lets several tasks share one machine or machine role: the individual assignments go away and the resource is consumed once instead of n times - one crane used by three tasks is one crane. Beware, this loses information: quantity and utilization of the shared entry are the maximum over all participants, exactly as in the 'Share' menu. rillsoft_machine_sharing_release is therefore not an inverse - a task taken back out gets the shared value, not its original one. Afterwards the resource appears in rillsoft_project_tree_get under sharedAssignments[] and no longer under machineAssignments[] or machineRoleAssignments[]. In a portfolio all tasks must belong to the same project - shared use stays within one project. One undo step.
 
 ### rillsoft_machine_sharing_release
 
@@ -580,13 +580,13 @@ Changes a calendar as a partial update, so only the fields given take effect, an
 
 **Create baseline** · write, destructive · Parameters: `name`, `replaceAll`
 
-Creates a baseline as a snapshot of the current state of the project and selects it. With replaceAll:true the existing baselines are deleted first - that is the destructive part of this tool. Switching between existing baselines goes through rillsoft_baseline_select, and the planned-versus-actual comparison itself through rillsoft_variance_report_get. One undo step.
+Creates a baseline as a snapshot of the current state of the project and selects it. With replaceAll:true the existing baselines are deleted first - that is the destructive part of this tool. Switching between existing baselines goes through rillsoft_baseline_select, and the planned-versus-actual comparison itself through rillsoft_variance_report_get. Refused in a portfolio: there is no baseline there, not even per project. One undo step.
 
 ### rillsoft_baseline_delete
 
 **Delete baseline** · write, destructive · Parameters: `number`\*
 
-Deletes a baseline; where it was the selected one, the selection falls back to the dynamic baseline. Only that snapshot goes - the project keeps its planning data untouched. Listing what exists goes through rillsoft_baseline_list. One undo step.
+Deletes a baseline; where it was the selected one, the selection falls back to the dynamic baseline. Only that snapshot goes - the project keeps its planning data untouched. Listing what exists goes through rillsoft_baseline_list. Refused in a portfolio: there is no baseline there, not even per project. One undo step.
 
 ### rillsoft_baseline_list
 
@@ -598,7 +598,7 @@ Reads the baselines of the project (number, name, uuid) and the active selection
 
 **Select baseline** · write · Parameters: `number`\*
 
-Selects the baseline used for the planned-versus-actual comparison. It only moves the selection; no baseline is created or deleted here (rillsoft_baseline_create and rillsoft_baseline_delete do that), and the comparison itself is read through rillsoft_variance_report_get. One undo step.
+Selects the baseline used for the planned-versus-actual comparison. It only moves the selection; no baseline is created or deleted here (rillsoft_baseline_create and rillsoft_baseline_delete do that), and the comparison itself is read through rillsoft_variance_report_get. Refused in a portfolio: there is no baseline there, not even per project. One undo step.
 
 ### rillsoft_variance_report_get
 
@@ -705,7 +705,7 @@ Renames a portfolio of the logged-in client on the Rillsoft Integration Server a
 
 **Attach RIS document** · write · Parameters: `folderId`\*, `path`\*, `description`, `uuid`
 
-Stores a local file as a new document in the document management of the Rillsoft Integration Server and hangs it on a task, a subproject or the project itself - the 'Add' button of the documents page. Today the server accepts documents on tasks only: a subproject or the project itself answers ris_not_found (the text says why), so give the uuid of a task. Takes effect on the server at once: no undo step, the project itself is not marked as changed, and rillsoft_history_undo does not take it back; rillsoft_document_ris_delete removes it. Requires the project to be stored on the server (rillsoft_project_ris_save_as first for a new one), the DMS license function and the create role; the answer is the document as the server holds it afterwards.
+Stores a local file as a new document in the document management of the Rillsoft Integration Server and hangs it on a task, a subproject or the project itself - the 'Add' button of the documents page. Today the server accepts documents on tasks only: a subproject or the project itself answers ris_not_found (the text says why), so give the uuid of a task. Takes effect on the server at once: no undo step, the project itself is not marked as changed, and rillsoft_history_undo does not take it back; rillsoft_document_ris_delete removes it. Requires the project to be stored on the server (rillsoft_project_ris_save_as first for a new one), the DMS license function and the create role; refused in an open portfolio, as in the documents dialog; the answer is the document as the server holds it afterwards.
 
 ### rillsoft_document_ris_delete
 
