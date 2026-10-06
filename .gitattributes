@@ -1,0 +1,4 @@
+# The repository holds documentation only; the helper script that generates
+# the tool catalogue is not the MCP server and should not set the repository
+# language on GitHub or in MCP directories.
+scripts/** linguist-vendored
