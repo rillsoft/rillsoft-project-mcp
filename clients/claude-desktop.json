@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "rillsoft-project": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote@0.14.3", "http://127.0.0.1:3928/mcp"]
+    }
+  }
+}

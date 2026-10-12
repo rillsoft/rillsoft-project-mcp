@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "rillsoft-project": {
+      "url": "http://127.0.0.1:3928/mcp"
+    }
+  }
+}

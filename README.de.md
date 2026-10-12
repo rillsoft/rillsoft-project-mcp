@@ -70,9 +70,19 @@ Vollständige Dokumentation: **https://rillsoft.ai/de/mcp/**
 
    Ist in den Einstellungen ein API-Key gesetzt, gilt
    [`clients/generic-api-key.json`](clients/generic-api-key.json)
-   (`Authorization: Bearer <KEY>`). Das Format folgt der MCP-Spezifikation;
-   die Feldnamen können je Client abweichen – die Dokumentation Ihres Clients
-   ist maßgeblich. Geprüft haben wir die Verbindung mit Claude und Codex.
+   (`Authorization: Bearer <KEY>`). Fertige Einträge je Client:
+
+   | Client | Datei | Wohin | Geprüft |
+   |---|---|---|---|
+   | Claude Code | [`claude-code.mcp.json`](clients/claude-code.mcp.json) | `.mcp.json` im Projektordner, oder `claude mcp add --transport http rillsoft-project http://127.0.0.1:3928/mcp` | 12.10.2026, 2.1.296 |
+   | Claude Desktop | [`claude-desktop.json`](clients/claude-desktop.json) | `claude_desktop_config.json` (Einstellungen → Entwickler → Konfiguration bearbeiten); die Brücke `mcp-remote` braucht Node.js | 12.10.2026, 2.31226 |
+   | Codex | [`codex.toml`](clients/codex.toml) | `~/.codex/config.toml`, oder `codex mcp add rillsoft-project --url http://127.0.0.1:3928/mcp` | 12.10.2026, CLI 0.162 |
+   | VS Code | [`vscode.mcp.json`](clients/vscode.mcp.json) | `.vscode/mcp.json` | 12.10.2026, 1.117 |
+   | Cursor | [`cursor.mcp.json`](clients/cursor.mcp.json) | `~/.cursor/mcp.json` | nach Herstellerdoku |
+
+   Claude Code und VS Code brauchen Rillsoft Project 10 ab Build 10.0.625.
+   Jeder andere Client, der MCP über Streamable HTTP spricht, nutzt die
+   Adresse oben; die Feldnamen nennt seine Dokumentation.
    **Kontrolle:** Der Client listet die Werkzeuge des Servers auf – im
    Nur-Lesen-Modus nur die lesenden. `/mcp` gilt exakt, `/mcp/` ist ein 404.
 3. **Die erste Frage stellen**, zum Beispiel: *Fasse den aktuellen

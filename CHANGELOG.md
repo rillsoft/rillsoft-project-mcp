@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-12
+
+- Client configurations per client in `clients/`: Claude Code
+  (`claude-code.mcp.json`), Claude Desktop via the `mcp-remote` bridge
+  (`claude-desktop.json`), Codex (`codex.toml`), VS Code (`vscode.mcp.json`)
+  and Cursor (`cursor.mcp.json`); README table with file, location and
+  verification date. Claude Code and VS Code need build 10.0.625 or later.
+
 ## 2026-09-29 (2)
 
 - Tool catalogue regenerated from Rillsoft Project 10.0.624.0 (118 tools)
