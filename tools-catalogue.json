@@ -1,6 +1,6 @@
 {
-  "version": "10.0.624.0",
-  "capturedAt": "2026-09-29",
+  "version": "10.0.626.0",
+  "capturedAt": "2026-10-17",
   "protocolVersion": "2025-06-18",
   "count": {
     "total": 118,
@@ -212,7 +212,7 @@
           "title": "Reschedule at status date",
           "access": "write",
           "params": [],
-          "description": "Runs the status date computation: whatever is unfinished moves behind the current status date, computed by RP. One undo step."
+          "description": "Reschedules only the unfinished work: every task or part that is not complete at the status date moves behind it; finished work and dates before the status date stay. Does not recompute the whole schedule - that is rillsoft_project_reschedule; does not move the status date itself - that is rillsoft_project_status_date_set. Rolled back as a whole when a fixed milestone would have to move (conflict_rolled_back). One undo step."
         },
         {
           "name": "rillsoft_project_status_date_set",

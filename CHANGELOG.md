@@ -1,5 +1,41 @@
 # Changelog
 
+## 2026-10-17 (3)
+
+- Tool catalogue regenerated from Rillsoft Project 10.0.626.0 (118 tools,
+  decision of 2026-10-17 to use build 10.0.626 for the catalogue entries):
+  only `rillsoft_project_status_date_reschedule` changed its description
+  ("Reschedules only the unfinished work ..."). Package version raised to
+  10.0.626 so that package and tool list belong to the same build.
+
+## 2026-10-17 (2)
+
+- `launcher.js` implemented: bridge from stdio to the fixed endpoint
+  `http://127.0.0.1:3928/mcp` (Streamable HTTP; session id and protocol
+  version on every request, JSON and SSE answers written as JSON-RPC lines,
+  `DELETE /mcp` at EOF) and fallback without Rillsoft Project (`initialize`
+  with `instructions` naming the state, `tools/list` from `tools-list.json`,
+  `tools/call` with `isError: true` and a hint, `ping`, otherwise `-32601`).
+  The mode is decided once at `initialize` (connection refused or 2 s
+  timeout); a later outage or an HTTP `401` (API key set in the program) is
+  reported as a JSON-RPC error, never as a silent fallback. No dependencies,
+  Node 18 or later; only `RILLSOFT_MCP_LOG=<file>` for diagnostics.
+  `client-test.js` (not in the package) exercises both modes and checks that
+  stdout carries JSON-RPC only and that the launcher exits after EOF.
+
+## 2026-10-17
+
+- Launcher scaffold for the npm package `@rillsoft/rillsoft-project-mcp`
+  (not yet published): `package.json` (bin `rillsoft-project-mcp`, files
+  `launcher.js`, `tools-list.json`, READMEs, licenses, `mcpName`
+  `ai.rillsoft/rillsoft-project`, no `os` field, version = program build
+  10.0.624), `LICENSE-MIT` for the launcher code, README section "Install
+  via npx" in English and German. `launcher.js` is a placeholder that reports
+  its state; the bridge to `http://127.0.0.1:3928/mcp` and the fallback that
+  lists the tools without Rillsoft Project follow in the next change. The
+  address is fixed; the launcher knows no environment variables and no API
+  key.
+
 ## 2026-10-12
 
 - Client configurations per client in `clients/`: Claude Code

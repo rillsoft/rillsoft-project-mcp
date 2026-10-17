@@ -14,9 +14,10 @@ machines and material, candidate search and staffing assistants, capacity
 analysis, baselines and plan/actual comparison, progress and status date, the
 resource pool, undo and redo.
 
-This repository contains **documentation and client configuration only**. The
-server is part of the Rillsoft Project 10 desktop application; there is no
-package to install and no hosted endpoint.
+This repository contains **documentation, client configuration and the npm
+launcher** (`launcher.js`, see [Install via npx](#install-via-npx-launcher)).
+The server itself is part of the Rillsoft Project 10 desktop application; the
+launcher only forwards to it, and there is no hosted endpoint.
 
 Full documentation: **https://rillsoft.ai/en/mcp/**
 
@@ -94,6 +95,38 @@ it back with Ctrl+Z like any of your own edits.
 
 Step by step with success checks: [Get started](https://rillsoft.ai/en/get-started/).
 
+## Install via npx (launcher)
+
+For catalogues, registries and clients that only start stdio servers there is
+an npm package, `@rillsoft/rillsoft-project-mcp` (prepared in this repository,
+not yet published). It is a launcher, not the server:
+
+- **With Rillsoft Project 10 running** it forwards every request over stdio to
+  the endpoint `http://127.0.0.1:3928/mcp`. The address is fixed; there is no
+  environment variable for the address and no API key. If an API key is set in
+  Rillsoft Project, the launcher reports the `401` – use the HTTP configuration
+  above instead. For diagnostics only, `RILLSOFT_MCP_LOG=<file>` writes the
+  requests and answers of a session to a log file.
+- **Without Rillsoft Project** (not running, or not Windows) it answers
+  `initialize` and `tools/list` itself from `tools-list.json` – the same 118
+  tools as the program – and every `tools/call` with `isError: true` and a
+  hint. This is what lets catalogues show the tools on Linux.
+
+```json
+{
+  "mcpServers": {
+    "rillsoft-project": {
+      "command": "npx",
+      "args": ["-y", "@rillsoft/rillsoft-project-mcp"]
+    }
+  }
+}
+```
+
+Requires Node.js 18 or later; real results only on Windows with Rillsoft
+Project 10 running. Customers do not need the launcher: the configurations
+above connect directly to the running program.
+
 ## If something is stuck
 
 | Symptom | Cause and remedy |
@@ -112,7 +145,7 @@ messages follow the language of the running Rillsoft Project. How
 `tools/list`, schemas, errors, undo, read-only mode and sessions work:
 [Developers: the MCP server contract](https://rillsoft.ai/en/developers/).
 
-The complete tool catalogue – 118 tools of Rillsoft Project 10.0.624.0 with
+The complete tool catalogue – 118 tools of Rillsoft Project 10.0.626.0 with
 title, access class, parameters and description – is in
 [TOOLS.md](TOOLS.md). It is generated from `tools/list` of the running program
 by `scripts/generate_tools.py`, never edited by hand; the raw result, including
@@ -131,10 +164,12 @@ the output schemas, is in [tools-list.json](tools-list.json).
 
 Rillsoft GmbH, Leonberg, Germany – software for scheduling, resource and
 multi-project planning. Rillsoft Project is proprietary software; this
-repository contains its MCP documentation only.
+repository contains its MCP documentation and the launcher.
 
 ## License
 
-The documentation in this repository is licensed under
-[CC BY 4.0](LICENSE). Rillsoft Project itself, including its MCP server, is
-proprietary software of Rillsoft GmbH and is not covered by this license.
+The documentation and the tool catalogue in this repository are licensed
+under [CC BY 4.0](LICENSE); the launcher code (`launcher.js`) under the
+[MIT License](LICENSE-MIT). Rillsoft Project itself, including its MCP
+server, is proprietary software of Rillsoft GmbH and is not covered by either
+license.

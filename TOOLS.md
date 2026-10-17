@@ -1,6 +1,6 @@
 # Tool catalogue
 
-Generated from `tools/list` of Rillsoft Project **10.0.624.0** on 2026-09-29 (MCP protocol `2025-06-18`) by `scripts/generate_tools.py`. Do not edit by hand – the running program is the contract; what `tools/list` of your installation returns applies.
+Generated from `tools/list` of Rillsoft Project **10.0.626.0** on 2026-10-17 (MCP protocol `2025-06-18`) by `scripts/generate_tools.py`. Do not edit by hand – the running program is the contract; what `tools/list` of your installation returns applies.
 
 118 tools: 37 read-only, 81 writing (of which 38 marked destructive). Names, titles, descriptions and parameters are English in every language build. Undo, read-only mode, errors and sessions: [Developers: the MCP server contract](https://rillsoft.ai/en/developers/). Output schemas are part of `tools/list` ([`tools-list.json`](tools-list.json)) and not repeated here.
 
@@ -136,7 +136,7 @@ Reorders the elements of the project - the same ordering function as the 'Order 
 
 **Reschedule at status date** · write · Parameters: –
 
-Runs the status date computation: whatever is unfinished moves behind the current status date, computed by RP. One undo step.
+Reschedules only the unfinished work: every task or part that is not complete at the status date moves behind it; finished work and dates before the status date stay. Does not recompute the whole schedule - that is rillsoft_project_reschedule; does not move the status date itself - that is rillsoft_project_status_date_set. Rolled back as a whole when a fixed milestone would have to move (conflict_rolled_back). One undo step.
 
 ### rillsoft_project_status_date_set
 
