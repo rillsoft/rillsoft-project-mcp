@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-17 (4)
+
+- `package.json`: scripts `build` (`node --check launcher.js`) and `test`
+  (`node client-test.js`). Glama derives `pnpm install && pnpm run build`
+  for Node repositories and failed with "Missing script: build"; the build
+  script only validates the launcher, there is nothing to compile.
+
 ## 2026-10-17 (3)
 
 - Tool catalogue regenerated from Rillsoft Project 10.0.626.0 (118 tools,

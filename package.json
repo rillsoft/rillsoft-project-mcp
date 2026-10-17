@@ -13,6 +13,10 @@
     "LICENSE",
     "LICENSE-MIT"
   ],
+  "scripts": {
+    "build": "node --check launcher.js",
+    "test": "node client-test.js"
+  },
   "engines": {
     "node": ">=18"
   },
