@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-10-18 (2)
+
+- Fix: when a client closes stdin while answers are still on their way, the
+  launcher now delivers them before it closes the session (at most 10 s),
+  then sends `DELETE /mcp`. Before, an answer in flight could be lost
+  (seen: `tools/list` after `tools/call`).
+- Fix: the launcher ends without `process.exit`. On Windows, `process.exit`
+  while fetch connections were closing aborted Node with a libuv assertion
+  (`!(handle->flags & UV_HANDLE_CLOSING)`, exit code 0xC0000409), e.g. after
+  an HTTP 401 or with answers in flight. stdout is still flushed before the
+  end (Linux pipe case of 2026-10-18 checked again).
+- The session close reports the HTTP status when `DELETE /mcp` is not
+  answered with success.
+
 ## 2026-10-18
 
 - Fix: `launcher.js` no longer exits before stdout is flushed. A client that

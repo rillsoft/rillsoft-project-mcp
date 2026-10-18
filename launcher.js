@@ -21,6 +21,7 @@ const ENDPOINT = "http://127.0.0.1:3928/mcp";
 const PROTOCOL_VERSION = "2025-06-18";
 const INITIALIZE_TIMEOUT_MS = 2000;
 const CLOSE_TIMEOUT_MS = 2000;
+const PENDING_TIMEOUT_MS = 10000;
 const GET_STARTED_URL = "https://rillsoft.ai/en/get-started/";
 const TOOLS_FILE = path.join(__dirname, "tools-list.json");
 const TAG = "rillsoft-project-mcp";
@@ -225,6 +226,15 @@ async function relay(res, wantsReply, id) {
   if (Array.isArray(msg)) msg.forEach(send); else send(msg);
 }
 
+// requests still on their way to or from the endpoint; EOF waits for them (see finish)
+const pending = new Set();
+
+function track(promise) {
+  pending.add(promise);
+  promise.finally(() => pending.delete(promise));
+  return promise;
+}
+
 async function forward(line, msg) {
   const wantsReply = isRequest(msg);
   const id = wantsReply ? msg.id : undefined;
@@ -280,7 +290,7 @@ async function decide() {
 }
 
 function dispatch(line, msg) {
-  if (mode === "bridge") forward(line, msg);
+  if (mode === "bridge") track(forward(line, msg));
   else answerLocally(line, msg);
 }
 
@@ -308,28 +318,38 @@ let finishing = false;
 async function closeSession() {
   if (mode !== "bridge" || !sessionId) return;
   try {
-    await fetch(ENDPOINT, {
+    const res = await fetch(ENDPOINT, {
       method: "DELETE",
       headers: { "Mcp-Session-Id": sessionId, "MCP-Protocol-Version": PROTOCOL_VERSION },
       signal: AbortSignal.timeout(CLOSE_TIMEOUT_MS),
     });
-    note("session closed at " + ENDPOINT);
+    if (res.ok) note("session closed at " + ENDPOINT);
+    else note("closing the session answered HTTP " + res.status);
   } catch (err) {
     note("closing the session failed (" + describe(err) + ")");
   }
 }
 
-// process.exit drops output that is still queued for a pipe or socket (the tools/list answer
-// is about 385 kB), so exit only after everything written to stdout has been flushed.
-function exitAfterFlush() {
+// End without process.exit: it drops output still queued for a pipe (the tools/list answer is
+// about 385 kB) and, on Windows, aborts Node while fetch connections are closing (libuv
+// assertion in async.c, exit code 0xC0000409). With stdin closed and fetch idle the event loop
+// runs empty after stdout is flushed; the timer is only a backstop.
+function exitNaturally() {
   setTimeout(() => process.exit(0), 5000).unref();
-  process.stdout.write("", () => process.exit(0));
+  process.exitCode = 0;
+  process.stdin.destroy();
 }
 
-function finish() {
+async function finish() {
   if (finishing) return;
   finishing = true;
-  closeSession().then(exitAfterFlush, exitAfterFlush);
+  // answers still on their way are delivered before the session is closed
+  if (pending.size) {
+    const limit = new Promise((resolve) => setTimeout(resolve, PENDING_TIMEOUT_MS).unref());
+    await Promise.race([Promise.allSettled([...pending]), limit]);
+  }
+  await closeSession();
+  exitNaturally();
 }
 
 process.on("SIGINT", finish);
