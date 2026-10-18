@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-10-18
+
+- Fix: `launcher.js` no longer exits before stdout is flushed. A client that
+  spawns the launcher through a pipe and closes stdin right after
+  `tools/list` (seen with a Node parent under Linux) received the 385 kB
+  answer cut off after the first 64 kB; the launcher now waits for the last
+  write before it exits (at most 5 s).
+- README EN/DE link the npm package `@rillsoft/rillsoft-project-mcp`
+  instead of "not yet published". Workflow `.github/workflows/npm-publish.yml`
+  publishes later versions from a GitHub release through npm trusted
+  publishing (OIDC, provenance, no stored token); it skips a version that is
+  already on npm. The first version 10.0.626 is published by hand.
+
 ## 2026-10-17 (4)
 
 - `package.json`: scripts `build` (`node --check launcher.js`) and `test`

@@ -99,8 +99,9 @@ Schritt für Schritt mit Kontrollen: [Erste Schritte](https://rillsoft.ai/de/ers
 ## Installation per npx (Launcher)
 
 Für Kataloge, Registries und Clients, die nur stdio-Server starten, gibt es
-ein npm-Paket, `@rillsoft/rillsoft-project-mcp` (in diesem Repository
-vorbereitet, noch nicht veröffentlicht). Es ist ein Launcher, nicht der Server:
+ein npm-Paket,
+[`@rillsoft/rillsoft-project-mcp`](https://www.npmjs.com/package/@rillsoft/rillsoft-project-mcp),
+gebaut aus diesem Repository. Es ist ein Launcher, nicht der Server:
 
 - **Läuft Rillsoft Project 10**, reicht er jede Anfrage über stdio an den
   Endpunkt `http://127.0.0.1:3928/mcp` durch. Die Adresse ist fest; es gibt

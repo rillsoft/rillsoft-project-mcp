@@ -319,10 +319,17 @@ async function closeSession() {
   }
 }
 
+// process.exit drops output that is still queued for a pipe or socket (the tools/list answer
+// is about 385 kB), so exit only after everything written to stdout has been flushed.
+function exitAfterFlush() {
+  setTimeout(() => process.exit(0), 5000).unref();
+  process.stdout.write("", () => process.exit(0));
+}
+
 function finish() {
   if (finishing) return;
   finishing = true;
-  closeSession().then(() => process.exit(0), () => process.exit(0));
+  closeSession().then(exitAfterFlush, exitAfterFlush);
 }
 
 process.on("SIGINT", finish);

@@ -1,0 +1,42 @@
+# Publishes the launcher package to npm when a GitHub release is published.
+# Uses npm trusted publishing (OIDC): no token is stored in the repository. The
+# trusted publisher (this repository, this workflow file) must be configured once
+# in the package settings on npmjs.com. A version that is already on npm is skipped.
+name: npm publish
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+      - name: Check syntax and fallback
+        run: |
+          npm run build
+          node client-test.js
+      - name: Skip if this version is already published
+        id: check
+        run: |
+          NAME=$(node -p "require('./package.json').name")
+          VERSION=$(node -p "require('./package.json').version")
+          if npm view "$NAME@$VERSION" version >/dev/null 2>&1; then
+            echo "$NAME@$VERSION is already on npm, nothing to do"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Publish with provenance
+        if: steps.check.outputs.skip != 'true'
+        run: |
+          npm install -g npm@latest
+          npm publish --access public --provenance
