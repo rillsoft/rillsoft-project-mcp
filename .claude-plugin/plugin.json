@@ -1,0 +1,24 @@
+{
+  "name": "rillsoft-project",
+  "displayName": "Rillsoft Project",
+  "version": "10.0.626",
+  "description": "Connects Claude to Rillsoft Project 10, the Windows desktop software for multi-project resource and capacity planning: 118 tools for projects, tasks, resources, capacity, views and reports. Local only: starts a launcher that talks to http://127.0.0.1:3928/mcp in the running program.",
+  "author": {
+    "name": "Rillsoft GmbH",
+    "url": "https://rillsoft.ai/en/"
+  },
+  "homepage": "https://rillsoft.ai/en/mcp/",
+  "repository": "https://github.com/rillsoft/rillsoft-project-mcp",
+  "license": "(MIT AND CC-BY-4.0)",
+  "keywords": ["project-management", "resource-planning", "capacity-planning", "gantt", "windows", "mcp"],
+  "icon": "./assets/rillsoft-icon.png",
+  "documentationUrl": "https://rillsoft.ai/en/mcp/",
+  "supportUrl": "https://rillsoft.ai/en/get-started/",
+  "privacyPolicyUrl": "https://rillsoft.ai/en/privacy-policy/",
+  "mcpServers": {
+    "rillsoft-project": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/launcher.js"]
+    }
+  }
+}

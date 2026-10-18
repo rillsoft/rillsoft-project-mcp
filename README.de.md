@@ -130,6 +130,33 @@ Braucht Node.js ab Version 18; echte Ergebnisse nur unter Windows mit
 laufendem Rillsoft Project 10. Kunden brauchen den Launcher nicht: Die
 Konfigurationen oben verbinden direkt mit dem laufenden Programm.
 
+## Installation als Claude-Plugin
+
+Dieses Repository ist zugleich ein Plugin für Claude Code und Cowork
+(`.claude-plugin/`). In Claude Code:
+
+```text
+/plugin install rillsoft-project --marketplace rillsoft/rillsoft-project-mcp
+```
+
+Was das Plugin auf Ihrem Rechner tut:
+
+- Es startet einen lokalen MCP-Server, `node ${CLAUDE_PLUGIN_ROOT}/launcher.js`
+  (Node.js 18 oder neuer), denselben Launcher wie das npm-Paket oben.
+- Der Launcher spricht nur mit `http://127.0.0.1:3928/mcp`, dem MCP-Endpunkt des
+  auf demselben Rechner laufenden Rillsoft Project 10. Er sendet keine Daten an
+  andere Stellen, sammelt keine Telemetrie und braucht weder Konto noch
+  API-Schlüssel.
+- Ohne laufendes Rillsoft Project liest er `tools-list.json` aus dem
+  Plugin-Ordner und listet die Werkzeuge; jeder Werkzeugaufruf antwortet dann
+  mit einem Hinweis statt mit einem Ergebnis.
+- Eine Logdatei schreibt er nur, wenn Sie selbst `RILLSOFT_MCP_LOG=<Datei>` setzen.
+
+Ihr KI-Client überträgt die Projektdaten, die die Werkzeuge liefern, an seinen
+Anbieter – wie bei jedem MCP-Server. Lokale Plugin-Server laufen in Claude Code
+und Cowork; der Chat von Claude Desktop ignoriert sie – dort gilt die
+Konfiguration unter „Einrichten“.
+
 ## Wenn es hakt
 
 | Symptom | Ursache und Abhilfe |

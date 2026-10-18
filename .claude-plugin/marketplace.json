@@ -1,0 +1,15 @@
+{
+  "name": "rillsoft",
+  "description": "Plugins of Rillsoft GmbH for Claude Code and Cowork.",
+  "owner": {
+    "name": "Rillsoft GmbH",
+    "url": "https://rillsoft.ai/en/"
+  },
+  "plugins": [
+    {
+      "name": "rillsoft-project",
+      "source": "./",
+      "description": "Rillsoft Project 10 (Windows) for Claude: 118 tools for multi-project resource and capacity planning, local only."
+    }
+  ]
+}
