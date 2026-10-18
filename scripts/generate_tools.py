@@ -5,9 +5,9 @@ Usage:
     python scripts/generate_tools.py --port 8123
     python scripts/generate_tools.py --from-json      # rebuild from tools-list.json
 
-An API key, if one is set in Rillsoft Project, is read from the environment
-variable RILLSOFT_MCP_KEY. The script only calls initialize and tools/list and
-closes the session with DELETE; it changes nothing in the open project.
+The script sends no API key, like the launcher; clear the key in Rillsoft
+Project while generating. It only calls initialize and tools/list and closes
+the session with DELETE; it changes nothing in the open project.
 
 Writes:
     tools-list.json       raw tools/list result with serverInfo and capture date
@@ -19,7 +19,6 @@ Writes:
 import argparse
 import datetime
 import json
-import os
 import pathlib
 import urllib.request
 
@@ -56,8 +55,6 @@ RIS_NOTE = (
 def query(port):
     url = f"http://127.0.0.1:{port}/mcp"
     headers = {"Content-Type": "application/json", "Accept": "application/json, text/event-stream"}
-    if os.environ.get("RILLSOFT_MCP_KEY"):
-        headers["Authorization"] = "Bearer " + os.environ["RILLSOFT_MCP_KEY"]
 
     def call(body, sid=None, method="POST"):
         h = dict(headers)

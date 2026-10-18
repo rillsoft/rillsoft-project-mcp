@@ -1,12 +1,17 @@
 # Changelog
 
+## 2026-10-18 (4)
+
+- `scripts/generate_tools.py` sends no API key any more (the variable
+  `RILLSOFT_MCP_KEY` is gone), like the launcher; clear the key in Rillsoft
+  Project while generating the catalogue.
+
 ## 2026-10-18 (3)
 
 - The repository is now also a Claude plugin: `.claude-plugin/plugin.json`
   (`rillsoft-project` 10.0.626) starts the launcher as a local MCP server
   (`node ${CLAUDE_PLUGIN_ROOT}/launcher.js`), with listing fields for
-  Anthropic's directory (icon `assets/rillsoft-icon.png`, documentation,
-  support and privacy links). `.claude-plugin/marketplace.json` (`rillsoft`)
+  Anthropic's directory (icon, documentation, support and privacy links). `.claude-plugin/marketplace.json` (`rillsoft`)
   lets Claude Code install it with
   `/plugin install rillsoft-project --marketplace rillsoft/rillsoft-project-mcp`.
 - README EN/DE: section "Install as Claude plugin" with everything the plugin
