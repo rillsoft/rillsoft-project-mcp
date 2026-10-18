@@ -1,0 +1,24 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "rillsoft-project",
+  "version": "10.0.626",
+  "description": "Connects the agent to Rillsoft Project 10, the Windows desktop software for multi-project resource and capacity planning: 118 tools for projects, tasks, resources, capacity, views and reports. Local only: starts a launcher that talks to http://127.0.0.1:3928/mcp in the running program.",
+  "author": {
+    "name": "Rillsoft GmbH",
+    "email": "info@rillsoft.de",
+    "url": "https://rillsoft.ai/en/"
+  },
+  "homepage": "https://rillsoft.ai/en/mcp/",
+  "repository": "https://github.com/rillsoft/rillsoft-project-mcp",
+  "license": "(MIT AND CC-BY-4.0)",
+  "keywords": [
+    "rillsoft",
+    "rillsoft project",
+    "resource planning",
+    "capacity planning",
+    "multi-project planning",
+    "project portfolio",
+    "workload",
+    "gantt"
+  ]
+}

@@ -13,6 +13,15 @@
 - README: the plugin reads and sends no credential; the `_ris_` tools use the
   Rillsoft Integration Server login of Rillsoft Project itself.
 
+## 2026-10-19
+
+- Kiro power in the Agent Plugins format: `plugin.json` (schema 1.0.0,
+  keywords for activation) and `mcp.json` (stdio server
+  `node ${PLUGIN_ROOT}/launcher.js`) at the repository root, both valid
+  against the Agent Plugins schemas. The Claude plugin in `.claude-plugin/`
+  and the npm package are unchanged.
+- README EN/DE: links to the privacy policy and the support address.
+
 ## 2026-10-18 (4)
 
 - `scripts/generate_tools.py` sends no API key any more (the variable

@@ -198,6 +198,8 @@ damit keine Datei 256 KiB überschreitet; der Launcher fügt beide wieder zu
 - Prompt-Bibliothek: https://rillsoft.ai/de/prompts/
 - Produkt: https://www.rillsoft.de/mcp-server/
 - Offizielle MCP-Registry: `ai.rillsoft/rillsoft-project` ([Eintrag](https://registry.modelcontextprotocol.io/v0/servers?search=ai.rillsoft/rillsoft-project))
+- Datenschutz: https://rillsoft.ai/de/datenschutz/
+- Support: info@rillsoft.de
 
 ## Anbieter
 

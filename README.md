@@ -193,6 +193,8 @@ that no file exceeds 256 KiB; the launcher merges them back into `tools/list`).
 - Prompt library: https://rillsoft.ai/en/prompts/
 - Product: https://www.rillsoft.com/mcp-server/
 - Official MCP Registry: `ai.rillsoft/rillsoft-project` ([entry](https://registry.modelcontextprotocol.io/v0/servers?search=ai.rillsoft/rillsoft-project))
+- Privacy policy: https://rillsoft.ai/en/privacy-policy/
+- Support: info@rillsoft.de
 
 ## Provider
 
