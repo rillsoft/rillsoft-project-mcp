@@ -21,6 +21,10 @@
   against the Agent Plugins schemas. The Claude plugin in `.claude-plugin/`
   and the npm package are unchanged.
 - README EN/DE: links to the privacy policy and the support address.
+- Antigravity plugin in `antigravity/`: `plugin.json` (name and description
+  only, as the Antigravity schema allows) and `mcp_config.json` with
+  `serverUrl` `http://127.0.0.1:3928/mcp` (no code, no launcher); README EN/DE
+  section "Install in Antigravity".
 
 ## 2026-10-18 (4)
 

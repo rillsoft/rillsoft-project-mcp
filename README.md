@@ -159,6 +159,19 @@ as with every MCP server. Local plugin servers run in Claude Code and Cowork;
 the chat in Claude Desktop ignores them – use the configuration under
 “Set up” there.
 
+## Install in Antigravity
+
+The folder [`antigravity/`](antigravity/) is a plugin for Google Antigravity
+(app and CLI). It holds no code: `mcp_config.json` connects Antigravity
+directly to `http://127.0.0.1:3928/mcp` of Rillsoft Project 10 running on the
+same computer. With a local copy of this repository:
+
+```text
+agy plugin install <path-to-repository>/antigravity
+```
+
+Start Rillsoft Project 10 first; without it the server is not reachable.
+
 ## If something is stuck
 
 | Symptom | Cause and remedy |
