@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-11-08
+
+- `tools-list.json` (665 KB) is split for the Claude plugin directory, which
+  holds every file over 256 KiB for review: `tools-list.json` keeps the tools
+  without their output schemas (178 KB), `tools-output-schemas.json` holds the
+  output schema of each tool by name (210 KB), both one entry per line. The
+  launcher and `client-test.js` merge them back; `tools/list` in the fallback is
+  byte-identical to before (118 tools). `scripts/generate_tools.py` writes both
+  files and refuses a split that the merge would not undo or a file over the
+  limit. The npm package ships both files.
+- README: the plugin reads and sends no credential; the `_ris_` tools use the
+  Rillsoft Integration Server login of Rillsoft Project itself.
+
 ## 2026-10-18 (4)
 
 - `scripts/generate_tools.py` sends no API key any more (the variable

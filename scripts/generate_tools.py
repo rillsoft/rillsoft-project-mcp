@@ -10,7 +10,13 @@ Project while generating. It only calls initialize and tools/list and closes
 the session with DELETE; it changes nothing in the open project.
 
 Writes:
-    tools-list.json       raw tools/list result with serverInfo and capture date
+    tools-list.json       raw tools/list result with serverInfo and capture date,
+                          without the output schemas, one tool per line
+    tools-output-schemas.json
+                          the output schema of every tool by name, one per line;
+                          launcher.js merges both files back into tools/list.
+                          Split so that no file of the Claude plugin exceeds
+                          256 KiB (directory review limit)
     tools-catalogue.json  the same, grouped into sections without schemas --
                           source of the catalogue on rillsoft.ai (data/mcp_tools.json)
     TOOLS.md              readable catalogue; never edit by hand
@@ -24,6 +30,7 @@ import urllib.request
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 JSON_FILE = ROOT / "tools-list.json"
+SCHEMA_FILE = ROOT / "tools-output-schemas.json"
 CATALOGUE_FILE = ROOT / "tools-catalogue.json"
 MD_FILE = ROOT / "TOOLS.md"
 PROTOCOL = "2025-06-18"
@@ -150,8 +157,9 @@ def render(cat):
         "Names, titles, descriptions and parameters are English in every language build. "
         "Undo, read-only mode, errors and sessions: "
         "[Developers: the MCP server contract](https://rillsoft.ai/en/developers/). "
-        "Output schemas are part of `tools/list` ([`tools-list.json`](tools-list.json)) "
-        "and not repeated here.",
+        "Output schemas are part of `tools/list` and not repeated here; the repository "
+        "keeps them in [`tools-output-schemas.json`](tools-output-schemas.json) next to "
+        "[`tools-list.json`](tools-list.json).",
         "",
         "**Access** follows the tool annotations: *read-only* (`readOnlyHint`), "
         "*write*, *write, destructive* (`destructiveHint`). "
@@ -182,16 +190,78 @@ def write(path, text):
     path.write_text(text, encoding="utf-8", newline="\n")
 
 
+FILE_LIMIT = 256 * 1024  # bytes per file in the Claude plugin directory
+
+
+def compact(value):
+    return json.dumps(value, ensure_ascii=False, separators=(",", ":"))
+
+
+def merge_tools(listed, schemas):
+    """tools-list.json plus tools-output-schemas.json -> the tools/list result.
+
+    Same rule as toolsList() in launcher.js: the output schema is added by name and
+    the keys of each tool are put in sorted order, the order the program uses.
+    """
+    data = dict(listed)
+    tools = []
+    for tool in listed["tools"]:
+        tool = dict(tool)
+        if tool["name"] in schemas:
+            tool["outputSchema"] = schemas[tool["name"]]
+        tools.append({k: tool[k] for k in sorted(tool)})
+    data["tools"] = tools
+    return data
+
+
+def load_tools():
+    listed = json.loads(JSON_FILE.read_text(encoding="utf-8-sig"))
+    schemas = {}
+    if SCHEMA_FILE.exists():
+        schemas = json.loads(SCHEMA_FILE.read_text(encoding="utf-8-sig"))["outputSchemas"]
+    return merge_tools(listed, schemas)
+
+
+def save_tools(data):
+    """Write tools-list.json and tools-output-schemas.json; refuse a split that loses data."""
+    head = {k: v for k, v in data.items() if k != "tools"}
+    tools, schemas = [], {}
+    for tool in data["tools"]:
+        tool = dict(tool)
+        if "outputSchema" in tool:
+            schemas[tool["name"]] = tool.pop("outputSchema")
+        tools.append(tool)
+    if merge_tools({**head, "tools": tools}, schemas) != data or any(
+            list(t) != sorted(t) for t in data["tools"]):
+        raise SystemExit("tools/list does not survive the split (key order changed?); not written")
+    lines = [compact(head)[:-1] + ',"tools":[']
+    lines += [compact(t) + ("," if i < len(tools) - 1 else "") for i, t in enumerate(tools)]
+    lines += ["]}"]
+    list_text = "\n".join(lines) + "\n"
+    items = list(schemas.items())
+    lines = ['{"note":"outputSchema of every tool in tools-list.json, by name; '
+             'launcher.js merges both files into tools/list","outputSchemas":{']
+    lines += [compact(k) + ":" + compact(v) + ("," if i < len(items) - 1 else "")
+              for i, (k, v) in enumerate(items)]
+    lines += ["}}"]
+    schema_text = "\n".join(lines) + "\n"
+    for path, text in ((JSON_FILE, list_text), (SCHEMA_FILE, schema_text)):
+        size = len(text.encode("utf-8"))
+        if size >= FILE_LIMIT:
+            raise SystemExit(f"{path.name}: {size} bytes, limit {FILE_LIMIT}; not written")
+        write(path, text)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--port", type=int, default=3928)
     ap.add_argument("--from-json", action="store_true", help="rebuild from tools-list.json")
     args = ap.parse_args()
     if args.from_json:
-        data = json.loads(JSON_FILE.read_text(encoding="utf-8"))
+        data = load_tools()
     else:
         data = query(args.port)
-        write(JSON_FILE, json.dumps(data, ensure_ascii=False, indent=2) + "\n")
+    save_tools(data)
     cat = catalogue(data)
     write(CATALOGUE_FILE, json.dumps(cat, ensure_ascii=False, indent=2) + "\n")
     write(MD_FILE, render(cat))

@@ -147,10 +147,15 @@ Was das Plugin auf Ihrem Rechner tut:
   auf demselben Rechner laufenden Rillsoft Project 10. Er sendet keine Daten an
   andere Stellen, sammelt keine Telemetrie und braucht weder Konto noch
   API-Schlüssel.
-- Ohne laufendes Rillsoft Project liest er `tools-list.json` aus dem
-  Plugin-Ordner und listet die Werkzeuge; jeder Werkzeugaufruf antwortet dann
+- Ohne laufendes Rillsoft Project liest er `tools-list.json` und
+  `tools-output-schemas.json` aus dem Plugin-Ordner und listet die Werkzeuge; jeder Werkzeugaufruf antwortet dann
   mit einem Hinweis statt mit einem Ergebnis.
 - Eine Logdatei schreibt er nur, wenn Sie selbst `RILLSOFT_MCP_LOG=<Datei>` setzen.
+- Er liest keine Zugangsdaten, Token oder API-Schlüssel aus Ihrer Umgebung oder
+  aus Dateien und sendet keine. Die `_ris_`-Werkzeuge arbeiten mit der
+  Verbindung zum Rillsoft Integration Server, an der Rillsoft Project selbst
+  angemeldet ist; diese Anmeldung bleibt im Programm und läuft nie über das
+  Plugin.
 
 Ihr KI-Client überträgt die Projektdaten, die die Werkzeuge liefern, an seinen
 Anbieter – wie bei jedem MCP-Server. Lokale Plugin-Server laufen in Claude Code
@@ -180,7 +185,10 @@ Der vollständige Werkzeugkatalog – 118 Werkzeuge von Rillsoft Project
 [TOOLS.md](TOOLS.md) (englisch, wie das Programm ihn liefert). Er wird von
 `scripts/generate_tools.py` aus `tools/list` des laufenden Programms erzeugt
 und nie von Hand gepflegt; das Rohergebnis samt Ausgabeschemas steht in
-[tools-list.json](tools-list.json).
+[tools-list.json](tools-list.json) und
+[tools-output-schemas.json](tools-output-schemas.json) (vom Skript geteilt,
+damit keine Datei 256 KiB überschreitet; der Launcher fügt beide wieder zu
+`tools/list` zusammen).
 
 ## Links
 

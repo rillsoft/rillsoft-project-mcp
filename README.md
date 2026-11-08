@@ -144,10 +144,15 @@ What the plugin does on your machine:
 - The launcher talks only to `http://127.0.0.1:3928/mcp`, the MCP endpoint of
   Rillsoft Project 10 running on the same computer. It sends no data anywhere
   else, collects no telemetry, needs no account and no API key.
-- Without Rillsoft Project running it reads `tools-list.json` from the plugin
+- Without Rillsoft Project running it reads `tools-list.json` and
+  `tools-output-schemas.json` from the plugin
   folder and lists the tools; every tool call then answers with a hint instead
   of a result.
 - It writes a log file only if you set `RILLSOFT_MCP_LOG=<file>` yourself.
+- It reads no credential, token or API key from your environment or files and
+  sends none. The `_ris_` tools work with the Rillsoft Integration Server
+  connection that Rillsoft Project itself is logged in to; that login stays
+  inside the program and never passes through the plugin.
 
 Your AI client sends the project data that the tools return to its provider,
 as with every MCP server. Local plugin servers run in Claude Code and Cowork;
@@ -176,7 +181,9 @@ The complete tool catalogue – 118 tools of Rillsoft Project 10.0.626.0 with
 title, access class, parameters and description – is in
 [TOOLS.md](TOOLS.md). It is generated from `tools/list` of the running program
 by `scripts/generate_tools.py`, never edited by hand; the raw result, including
-the output schemas, is in [tools-list.json](tools-list.json).
+the output schemas, is in [tools-list.json](tools-list.json) and
+[tools-output-schemas.json](tools-output-schemas.json) (split by the script so
+that no file exceeds 256 KiB; the launcher merges them back into `tools/list`).
 
 ## Links
 

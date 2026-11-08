@@ -2,7 +2,7 @@
 
 Generated from `tools/list` of Rillsoft Project **10.0.626.0** on 2026-10-17 (MCP protocol `2025-06-18`) by `scripts/generate_tools.py`. Do not edit by hand – the running program is the contract; what `tools/list` of your installation returns applies.
 
-118 tools: 37 read-only, 81 writing (of which 38 marked destructive). Names, titles, descriptions and parameters are English in every language build. Undo, read-only mode, errors and sessions: [Developers: the MCP server contract](https://rillsoft.ai/en/developers/). Output schemas are part of `tools/list` ([`tools-list.json`](tools-list.json)) and not repeated here.
+118 tools: 37 read-only, 81 writing (of which 38 marked destructive). Names, titles, descriptions and parameters are English in every language build. Undo, read-only mode, errors and sessions: [Developers: the MCP server contract](https://rillsoft.ai/en/developers/). Output schemas are part of `tools/list` and not repeated here; the repository keeps them in [`tools-output-schemas.json`](tools-output-schemas.json) next to [`tools-list.json`](tools-list.json).
 
 **Access** follows the tool annotations: *read-only* (`readOnlyHint`), *write*, *write, destructive* (`destructiveHint`). **Parameters** marked \* are required.
 

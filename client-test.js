@@ -19,6 +19,7 @@ const path = require("path");
 
 const LAUNCHER = path.join(__dirname, "launcher.js");
 const TOOLS_FILE = path.join(__dirname, "tools-list.json");
+const SCHEMA_FILE = path.join(__dirname, "tools-output-schemas.json");
 const NOT_RUNNING_PREFIX = "Rillsoft Project 10 is not running";
 const TIMEOUT_MS = 15000;
 
@@ -35,8 +36,14 @@ const requests = [
 ];
 const expectedIds = requests.filter((r) => r.id !== undefined).map((r) => r.id);
 
-const file = JSON.parse(fs.readFileSync(TOOLS_FILE, "utf8").replace(/^﻿/, ""));
-const fileTools = file.tools;
+// The expected tools/list: tools-list.json with the output schemas of
+// tools-output-schemas.json, keys sorted - the same merge as launcher.js.
+const readJson = (f) => JSON.parse(fs.readFileSync(f, "utf8").replace(/^﻿/, ""));
+const schemas = readJson(SCHEMA_FILE).outputSchemas;
+const fileTools = readJson(TOOLS_FILE).tools.map((tool) => {
+  const full = Object.assign({}, tool, schemas[tool.name] ? { outputSchema: schemas[tool.name] } : {});
+  return Object.fromEntries(Object.keys(full).sort().map((k) => [k, full[k]]));
+});
 
 const t0 = Date.now();
 const sentAt = new Map();

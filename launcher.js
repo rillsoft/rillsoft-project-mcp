@@ -4,7 +4,8 @@
 // Bridge:   forwards every JSON-RPC line from stdin to the fixed local endpoint
 //           http://127.0.0.1:3928/mcp (Streamable HTTP) and writes the answers to stdout.
 // Fallback: when the endpoint is not reachable at initialize (connection refused, timeout 2 s),
-//           answers initialize and tools/list from tools-list.json (the tools of the program)
+//           answers initialize and tools/list from tools-list.json and
+//           tools-output-schemas.json (the tools of the program)
 //           and every tools/call with isError: true and a hint. The mode is decided once per
 //           session; a later outage of the endpoint is reported as a JSON-RPC error, never as
 //           a silent switch to the fallback.
@@ -24,6 +25,7 @@ const CLOSE_TIMEOUT_MS = 2000;
 const PENDING_TIMEOUT_MS = 10000;
 const GET_STARTED_URL = "https://rillsoft.ai/en/get-started/";
 const TOOLS_FILE = path.join(__dirname, "tools-list.json");
+const SCHEMA_FILE = path.join(__dirname, "tools-output-schemas.json");
 const TAG = "rillsoft-project-mcp";
 
 const NOT_RUNNING =
@@ -86,13 +88,36 @@ function isRequest(msg) {
 
 let toolsCache = null;
 
+function readJson(file) {
+  return JSON.parse(fs.readFileSync(file, "utf8").replace(/^﻿/, ""));
+}
+
+// tools-list.json holds the tools without their output schemas, tools-output-schemas.json
+// the schemas by tool name (split to keep every file under 256 KiB). Merged here back into
+// the tools/list result of the program: schema added by name, keys in sorted order like the
+// program; scripts/generate_tools.py refuses a split that this merge would not undo.
+function mergeOutputSchemas(tools) {
+  let schemas = {};
+  try {
+    schemas = readJson(SCHEMA_FILE).outputSchemas || {};
+  } catch (err) {
+    note("tools-output-schemas.json not readable (" + describe(err) + "); tools listed without output schemas");
+  }
+  return tools.map((tool) => {
+    const full = Object.assign({}, tool);
+    if (Object.prototype.hasOwnProperty.call(schemas, tool.name)) full.outputSchema = schemas[tool.name];
+    const sorted = {};
+    for (const key of Object.keys(full).sort()) sorted[key] = full[key];
+    return sorted;
+  });
+}
+
 function toolsList() {
   if (toolsCache) return toolsCache;
   try {
-    const raw = fs.readFileSync(TOOLS_FILE, "utf8").replace(/^﻿/, "");
-    const data = JSON.parse(raw);
+    const data = readJson(TOOLS_FILE);
     toolsCache = {
-      tools: Array.isArray(data.tools) ? data.tools : [],
+      tools: Array.isArray(data.tools) ? mergeOutputSchemas(data.tools) : [],
       serverInfo: data.serverInfo || { name: "rillsoft-project", version: "0" },
       protocolVersion: data.protocolVersion || PROTOCOL_VERSION,
     };
